@@ -1,5 +1,6 @@
 "use client";
 import React from 'react';
+import Link from 'next/link';
 
 export default function CommunityHome() {
   return (
@@ -15,29 +16,29 @@ export default function CommunityHome() {
 
       {/* Main Menu Grid */}
       <div className="p-6 grid grid-cols-1 gap-4 max-w-md mx-auto">
-        <button className="bg-orange-600 p-6 rounded-xl flex items-center gap-4 shadow-lg active:scale-95 transition-transform">
+        <Link href="/community/report" className="bg-orange-600 p-6 rounded-xl flex items-center gap-4 shadow-lg active:scale-95 transition-transform">
           <span className="text-3xl">📝</span>
           <div className="text-left">
             <p className="font-black text-xl uppercase">Report Incident</p>
             <p className="text-orange-100 text-sm">Send a new damage report</p>
           </div>
-        </button>
+        </Link>
 
-        <button className="bg-slate-800 p-6 rounded-xl border-2 border-slate-700 flex items-center gap-4">
+        <Link href="/community/my-reports" className="bg-slate-800 p-6 rounded-xl border-2 border-slate-700 flex items-center gap-4">
           <span className="text-3xl">📁</span>
           <div className="text-left">
             <p className="font-black text-xl uppercase">My Reports</p>
             <p className="text-slate-400 text-sm">View your previous submissions</p>
           </div>
-        </button>
+        </Link>
 
-        <button className="bg-slate-800 p-6 rounded-xl border-2 border-slate-700 flex items-center gap-4">
+        <Link href="/community/track" className="bg-slate-800 p-6 rounded-xl border-2 border-slate-700 flex items-center gap-4">
           <span className="text-3xl">🔍</span>
           <div className="text-left">
             <p className="font-black text-xl uppercase">Track Report</p>
             <p className="text-slate-400 text-sm">Check status of an issue</p>
           </div>
-        </button>
+        </Link>
       </div>
 
       {/* Offline Status Banner */}

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef } from 'react';
+import { useState, useRef, type ReactNode } from 'react';
 
 // ── icons ────────────────────────────────────────────────────────────────────
 const IconPin = () => (
@@ -58,7 +58,15 @@ function generateRef() {
 }
 
 // ── Success overlay ───────────────────────────────────────────────────────────
-function SuccessOverlay({ refNum, infraType, damageGrade, photoCount, onClose }) {
+type SuccessOverlayProps = {
+  refNum: string;
+  infraType?: string;
+  damageGrade?: string;
+  photoCount: number;
+  onClose: () => void;
+};
+
+function SuccessOverlay({ refNum, infraType, damageGrade, photoCount, onClose }: SuccessOverlayProps) {
   const grade = DAMAGE_GRADES.find(g => g.id === damageGrade);
   const infra  = INFRA_TYPES.find(t => t.id === infraType);
 
@@ -201,12 +209,12 @@ export default function ReportPage() {
   const [damageGrade, setDamageGrade] = useState('');
   const [aiLoading, setAiLoading]     = useState(false);
   const [aiDone, setAiDone]           = useState(false);
-  const [photos, setPhotos]           = useState([]);   // { url, file }
+  const [photos, setPhotos]           = useState<{ url: string; file: File }[]>([]);   // { url, file }
   const [submitting, setSubmitting]   = useState(false);
   const [success, setSuccess]         = useState(false);
   const [refNum, setRefNum]           = useState('');
-  const fileRef  = useRef();
-  const cameraRef = useRef();
+  const fileRef  = useRef<HTMLInputElement | null>(null);
+  const cameraRef = useRef<HTMLInputElement | null>(null);
 
   // GPS
   function getGPS() {
@@ -223,9 +231,10 @@ export default function ReportPage() {
   }
 
   // Photo add
-  function addPhotos(files) {
-    const incoming = Array.from(files).slice(0, 4 - photos.length);
-    const mapped = incoming.map(f => ({ url: URL.createObjectURL(f), file: f }));
+  function addPhotos(files: FileList | null) {
+    if (!files) return;
+    const incoming = Array.from(files as FileList).slice(0, 4 - photos.length);
+    const mapped = incoming.map(f => ({ url: URL.createObjectURL(f as File), file: f as File }));
     const updated = [...photos, ...mapped].slice(0, 4);
     setPhotos(updated);
     // Simulate AI classification when first photo added
@@ -241,14 +250,14 @@ export default function ReportPage() {
     }
   }
 
-  function removePhoto(idx) {
+  function removePhoto(idx: number) {
     const updated = photos.filter((_, i) => i !== idx);
     setPhotos(updated);
     if (updated.length === 0) { setDamageGrade(''); setAiDone(false); }
   }
 
   // Submit
-  async function handleSubmit(e) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!location)  { alert('Please add a location.'); return; }
     if (!infraType) { alert('Please select an infrastructure type.'); return; }
@@ -402,11 +411,11 @@ export default function ReportPage() {
               <div style={{ display: 'flex', gap: 8 }}>
                 <input ref={cameraRef} type="file" accept="image/*" capture="environment" multiple style={{ display: 'none' }} onChange={e => addPhotos(e.target.files)} />
                 <input ref={fileRef}   type="file" accept="image/*" multiple           style={{ display: 'none' }} onChange={e => addPhotos(e.target.files)} />
-                <button type="button" onClick={() => cameraRef.current.click()}
+                <button type="button" onClick={() => cameraRef.current?.click()}
                   style={{ ...uploadBtnStyle, background: '#1a5276', color: '#fff', border: 'none' }}>
                   <IconCamera /><span style={{ fontSize: 13 }}>Take photo</span>
                 </button>
-                <button type="button" onClick={() => fileRef.current.click()}
+                <button type="button" onClick={() => fileRef.current?.click()}
                   style={{ ...uploadBtnStyle, background: '#fff', color: '#475569', border: '0.5px solid #e2e8f0' }}>
                   <IconUpload /><span style={{ fontSize: 13 }}>Upload</span>
                 </button>
@@ -531,7 +540,7 @@ export default function ReportPage() {
 }
 
 // ── tiny helpers ──────────────────────────────────────────────────────────────
-function SectionLabel({ icon, text, noMargin }) {
+function SectionLabel({ icon, text, noMargin }: { icon: ReactNode; text: string; noMargin?: boolean }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: noMargin ? 0 : 14, color: '#1a5276' }}>
       {icon}
