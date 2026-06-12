@@ -46,7 +46,7 @@ export default function CommunityLoginPage() {
             <div className="flex-grow border-t border-slate-100"></div>
           </div>
 
-          <Link href="/create-account" className="block w-full py-3.5 bg-white border-2 border-blue-900 text-blue-900 font-black uppercase text-xs rounded-xl hover:bg-slate-50 transition-all text-center">
+          <Link href="/create_account" className="block w-full py-3.5 bg-white border-2 border-blue-900 text-blue-900 font-black uppercase text-xs rounded-xl hover:bg-slate-50 transition-all text-center">
             Create Account
           </Link>
         </form>

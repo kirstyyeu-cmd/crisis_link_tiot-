@@ -1,7 +1,21 @@
 "use client";
+import dynamic from 'next/dynamic';
 import React, { useState, useRef, useEffect } from 'react';
+// ── Icons ──────────────────────────────────────
+const InfrastructureMap = dynamic(
+  () => import('@/components/report/infrastructureMap'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className='w-full h-64 bg-slate-100 rounded-2xl flex items-center justify-center border-2 border-dashed border-slate-200'>
+        <p className='text-slate-400 text-sm font-bold uppercase tracking-wide'>
+          Loading map.....
+        </p>
 
-// ── Icons ──────────────────────────────────────────────────────────────────
+      </div>
+    ),
+  }
+)
 const DropletIcon = () => (
   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2C12 2 5 10 5 14a7 7 0 0014 0c0-4-7-12-7-12z" />
@@ -301,6 +315,7 @@ export default function ReportPage() {
                 placeholder="Searching for your location…"
                 className="flex-grow p-4 pr-24 bg-slate-50 border-2 border-slate-200 rounded-2xl focus:border-blue-900 text-slate-900 font-semibold outline-none"
               />
+             
               <button
                 type="button"
                 onClick={getGPS}
@@ -316,6 +331,15 @@ export default function ReportPage() {
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
                 Location captured automatically
               </p>
+            )}
+            {location && location.includes(',') && !gpsLoading && (
+              <InfrastructureMap 
+                lat={parseFloat(location.split(',')[0]) || 0 }
+                lng={parseFloat(location.split(',')[1]) || 0 }
+                onFeatureSelect={(feature) => {
+                  console.log('Selected feature:', feature);
+                }}
+              />    
             )}
           </section>
 
