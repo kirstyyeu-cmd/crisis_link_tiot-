@@ -1,4 +1,5 @@
 "use client";
+import { InfraType } from '@/lib/overpass';
 import dynamic from 'next/dynamic';
 import React, { useState, useRef, useEffect } from 'react';
 // ── Icons ──────────────────────────────────────
@@ -336,6 +337,7 @@ export default function ReportPage() {
               <InfrastructureMap 
                 lat={parseFloat(location.split(',')[0]) || 0 }
                 lng={parseFloat(location.split(',')[1]) || 0 }
+                selectedInfraType={selectedInfra as InfraType}
                 onFeatureSelect={(feature) => {
                   console.log('Selected feature:', feature);
                 }}

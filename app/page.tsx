@@ -124,8 +124,8 @@ export default function LandingPage() {
 
         {/* Login links */}
         <div className="mt-6 flex flex-col gap-2">
-          <Link href="/login" className="text-blue-300 hover:text-white text-sm font-medium underline underline-offset-4 transition-colors">
-            Staff Login / Pro Access
+          <Link href="/coc-login" className="text-blue-300 hover:text-white text-sm font-medium underline underline-offset-4 transition-colors">
+            Crisis Operations Center
           </Link>
           <Link href="/com_login" className="text-blue-300 hover:text-white text-sm font-medium underline underline-offset-4 transition-colors">
             Community Member Login
