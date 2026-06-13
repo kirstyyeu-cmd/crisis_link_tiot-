@@ -24,7 +24,7 @@ export default function InfrastructureMap({ lat, lng, selectedInfraType, onFeatu
 
   function filterByInfraType(infraType: InfraType) {
     if (!map.current) return;
-    const filter = ['==', ['get', 'infra_type'], infraType];
+    const filter: maplibregl.FilterSpecification = ['==', ['get', 'infra_type'], infraType];
     if (map.current.getLayer('infra-fill'))    map.current.setFilter('infra-fill',    filter);
     if (map.current.getLayer('infra-outline')) map.current.setFilter('infra-outline', filter);
     if (map.current.getLayer('infra-line'))    map.current.setFilter('infra-line',    filter);
