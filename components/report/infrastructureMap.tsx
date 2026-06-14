@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import { fetchInfrastructure, osmToGeoJSON, InfraType } from '@/lib/overpass';
+import type * as GeoJSON from 'geojson';
 
 interface Props {
   lat: number;
@@ -59,9 +60,8 @@ export default function InfrastructureMap({ lat, lng, selectedInfraType, onFeatu
       // Add source
       map.current.addSource('infrastructure', {
         type: 'geojson',
-        data: geojson,
+        data: geojson as GeoJSON.FeatureCollection<GeoJSON.Geometry>,
       });
-
       // Filled polygons — buildings
       map.current.addLayer({
         id:     'infra-fill',
