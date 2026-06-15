@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import { useTranslate } from '@tolgee/react';
 
 const REPORTS = [
   {
@@ -33,21 +34,23 @@ const REPORTS = [
 ];
 
 export default function MyReportsPage() {
+  const { t } = useTranslate();
+
   return (
     <main className="min-h-screen bg-slate-950 text-white px-4 py-6 lg:px-8">
       <div className="mx-auto max-w-5xl">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-orange-300">Community reports</p>
-            <h1 className="text-3xl font-black">My Reports</h1>
-            <p className="mt-2 text-slate-400 max-w-2xl">Review past submissions, resolve status, and inspect photo evidence for each report.</p>
+            <p className="text-sm uppercase tracking-[0.3em] text-orange-300">{t('myReports.title')}</p>
+            <h1 className="text-3xl font-black">{t('myReports.title')}</h1>
+            <p className="mt-2 text-slate-400 max-w-2xl">{t('myReports.subtitle')}</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link href="/community/report" className="rounded-2xl bg-orange-600 px-5 py-3 text-sm font-semibold text-white hover:bg-orange-700 transition">
-              New report
+              {t('myReports.actions.newReport')}
             </Link>
             <Link href="/community/track" className="rounded-2xl border border-slate-700 px-5 py-3 text-sm text-slate-100 hover:bg-slate-800 transition">
-              Track report
+              {t('myReports.actions.trackReport')}
             </Link>
           </div>
         </div>
@@ -58,7 +61,7 @@ export default function MyReportsPage() {
               <div className="border-b border-slate-800 bg-slate-950/90 px-6 py-5 sm:px-8">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Reference</p>
+                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500">{t('myReports.fields.reference')}</p>
                     <p className="mt-1 text-lg font-semibold text-white">{report.id}</p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -72,16 +75,16 @@ export default function MyReportsPage() {
                 </div>
                 <div className="mt-4 grid gap-3 sm:grid-cols-3">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Date</p>
+                    <p className="text-xs uppercase tracking-[0.25em] text-slate-500">{t('myReports.fields.date')}</p>
                     <p className="mt-1 font-medium text-slate-100">{report.date}</p>
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Location</p>
+                    <p className="text-xs uppercase tracking-[0.25em] text-slate-500">{t('myReports.fields.location')}</p>
                     <p className="mt-1 font-medium text-slate-100">{report.location}</p>
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Status</p>
-                    <p className="mt-1 font-medium text-slate-100">{report.resolved ? 'Resolved' : 'Ongoing'}</p>
+                    <p className="text-xs uppercase tracking-[0.25em] text-slate-500">{t('myReports.fields.status')}</p>
+                    <p className="mt-1 font-medium text-slate-100">{report.resolved ? report.status : t('myReports.fields.ongoing')}</p>
                   </div>
                 </div>
               </div>

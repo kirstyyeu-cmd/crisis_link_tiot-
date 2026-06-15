@@ -1,5 +1,6 @@
 'use client';
 import { useState, useRef, type ReactNode } from 'react';
+import { useTranslate } from '@tolgee/react';
 
 // ── icons ────────────────────────────────────────────────────────────────────
 const IconPin = () => (
@@ -67,6 +68,7 @@ type SuccessOverlayProps = {
 };
 
 function SuccessOverlay({ refNum, infraType, damageGrade, photoCount, onClose }: SuccessOverlayProps) {
+  const { t } = useTranslate();
   const grade = DAMAGE_GRADES.find(g => g.id === damageGrade);
   const infra  = INFRA_TYPES.find(t => t.id === infraType);
 
@@ -118,9 +120,9 @@ function SuccessOverlay({ refNum, infraType, damageGrade, photoCount, onClose }:
             </p>
             <hr style={{ border: 'none', borderTop: '0.5px solid #f1f5f9', margin: '0 0 10px' }} />
             {[
-              { l: 'Infrastructure', v: infra?.label ?? '—' },
-              { l: 'Photos attached', v: `${photoCount}` },
-              { l: 'Status', v: 'Submitted', chip: true, chipColor: '#1a5276', chipBg: '#e6f1fb' },
+              { l: t('report.section.infrastructure'), v: infra ? t(`infrastructureTypes.${infra.id}`) : '—' },
+              { l: t('report.success.photosAttached'), v: `${photoCount}` },
+              { l: t('report.status.submitted'), v: t('report.status.submitted'), chip: true, chipColor: '#1a5276', chipBg: '#e6f1fb' },
             ].map(({ l, v, chip, chipColor, chipBg }) => (
               <div key={l} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', borderBottom: '0.5px solid #f8fafc', fontSize: 13 }}>
                 <span style={{ color: '#64748b' }}>{l}</span>
@@ -131,23 +133,23 @@ function SuccessOverlay({ refNum, infraType, damageGrade, photoCount, onClose }:
             ))}
             {grade && (
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', fontSize: 13 }}>
-                <span style={{ color: '#64748b' }}>Damage grade</span>
+                <span style={{ color: '#64748b' }}>{t('report.section.damageGrade')}</span>
                 <span style={{ background: grade.bg, color: grade.color, padding: '2px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600 }}>
-                  {grade.label}
+                  {t(`damageGrades.${grade.id}`)}
                 </span>
               </div>
             )}
           </div>
 
           {/* timeline */}
-          <p style={{ fontSize: 11, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 12 }}>Report progress</p>
+          <p style={{ fontSize: 11, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 12 }}>{t('report.status.progressInfo')}</p>
           <div style={{ position: 'relative', paddingLeft: 22, marginBottom: 16 }}>
             <div style={{ position: 'absolute', left: 7, top: 8, bottom: 8, width: 1.5, background: '#e2e8f0' }} />
             {[
-              { title: 'Submitted', sub: 'Just now — report received', done: true, active: false },
-              { title: 'Under review', sub: 'A responder is being assigned', done: false, active: true },
-              { title: 'Responded', sub: 'Action taken on the ground', done: false, active: false },
-              { title: 'Resolved', sub: 'Issue fully addressed', done: false, active: false },
+              { title: t('report.status.submitted'), sub: t('report.status.submittedInfo'), done: true, active: false },
+              { title: t('report.status.underReview'), sub: t('report.status.underReviewInfo'), done: false, active: true },
+              { title: t('report.status.responded'), sub: t('report.status.respondedInfo'), done: false, active: false },
+              { title: t('report.status.resolved'), sub: t('report.status.resolvedInfo'), done: false, active: false },
             ].map((s, i) => (
               <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
                 <div style={{
@@ -171,7 +173,7 @@ function SuccessOverlay({ refNum, infraType, damageGrade, photoCount, onClose }:
               <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="0.5" fill="#94a3b8"/>
             </svg>
             <p style={{ fontSize: 12, color: '#64748b', margin: 0, lineHeight: 1.5 }}>
-              If no response is received within <strong>48 hours</strong>, your report will be automatically re-escalated.
+              {t('report.success.reEscalation')}
             </p>
           </div>
 
@@ -181,14 +183,14 @@ function SuccessOverlay({ refNum, infraType, damageGrade, photoCount, onClose }:
             background: '#1a5276', color: '#fff', fontSize: 14, fontWeight: 600,
             cursor: 'pointer', marginBottom: 10,
           }}>
-            Submit another report
+            {t('report.actions.submitAnother')}
           </button>
           <button onClick={onClose} style={{
             width: '100%', padding: '12px', borderRadius: 10,
             border: '0.5px solid #e2e8f0', background: '#fff',
             color: '#64748b', fontSize: 13, cursor: 'pointer',
           }}>
-            Go to home
+            {t('report.actions.goHome')}
           </button>
         </div>
       </div>
@@ -215,6 +217,7 @@ export default function ReportPage() {
   const [refNum, setRefNum]           = useState('');
   const fileRef  = useRef<HTMLInputElement | null>(null);
   const cameraRef = useRef<HTMLInputElement | null>(null);
+  const { t } = useTranslate();
 
   // GPS
   function getGPS() {
@@ -226,7 +229,7 @@ export default function ReportPage() {
         setLocation(`${lat.toFixed(5)}, ${lng.toFixed(5)}`);
         setGpsLoading(false);
       },
-      () => { alert('Could not get location. Please type it manually.'); setGpsLoading(false); }
+      () => { alert(t('report.alerts.geolocationFailed')); setGpsLoading(false); }
     );
   }
 
@@ -259,9 +262,9 @@ export default function ReportPage() {
   // Submit
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!location)  { alert('Please add a location.'); return; }
-    if (!infraType) { alert('Please select an infrastructure type.'); return; }
-    if (photos.length === 0) { alert('Please upload at least one photo.'); return; }
+    if (!location)  { alert(t('report.alerts.addLocation')); return; }
+    if (!infraType) { alert(t('report.alerts.selectInfrastructure')); return; }
+    if (photos.length === 0) { alert(t('report.alerts.uploadPhoto')); return; }
     setSubmitting(true);
     // TODO: replace with real API call
     // await fetch('/api/reports', { method: 'POST', body: formData });
@@ -297,23 +300,20 @@ export default function ReportPage() {
             <span style={{ color: '#fff', fontWeight: 900, fontSize: 9, lineHeight: 1.2, textAlign: 'center' }}>UN<br/>DP</span>
           </div>
           <div>
-            <p style={{ color: '#fff', fontWeight: 600, fontSize: 15, margin: 0, fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: 0.4 }}>REPORT AN INCIDENT</p>
-            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 11, margin: 0 }}>Crisis Impact Reporter</p>
+            <p style={{ color: '#fff', fontWeight: 600, fontSize: 15, margin: 0, fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: 0.4 }}>{t('report.header.title')}</p>
+            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 11, margin: 0 }}>{t('report.header.subtitle')}</p>
           </div>
         </div>
 
-        {/* ── form */}
-        <form onSubmit={handleSubmit} style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 40px' }}>
-
-          {/* ── SECTION: Location */}
+        <form onSubmit={handleSubmit} style={{ padding: '20px', maxWidth: 1000, margin: '0 auto' }}>
           <div style={cardStyle}>
-            <SectionLabel icon={<IconPin />} text="Location" />
+            <SectionLabel icon={<IconPin />} text={t('report.section.location')} />
             <div style={{ position: 'relative' }}>
               <input
                 type="text"
                 value={location}
                 onChange={e => setLocation(e.target.value)}
-                placeholder="Search address or landmark…"
+                placeholder={t('report.placeholders.location')}
                 style={inputStyle}
               />
               {location && (
@@ -337,7 +337,7 @@ export default function ReportPage() {
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
                         <circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
                       </svg>
-                      GPS
+                      {t('misc.gps')}
                     </>
                 }
               </button>
@@ -345,7 +345,7 @@ export default function ReportPage() {
             {location && (
               <p style={{ fontSize: 11, color: '#16a34a', marginTop: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-                Location captured
+                {t('report.locationCaptured')}
               </p>
             )}
           </div>
@@ -354,19 +354,21 @@ export default function ReportPage() {
           <div style={cardStyle}>
             <SectionLabel icon={
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            } text="Infrastructure type" />
+            } text={t('report.section.infrastructure')} />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-              {INFRA_TYPES.map(t => (
-                <button key={t.id} type="button" onClick={() => setInfraType(t.id)}
+              {INFRA_TYPES.map(item => (
+                <button key={item.id} type="button" onClick={() => setInfraType(item.id)}
                   style={{
                     padding: '12px 6px', borderRadius: 10, cursor: 'pointer',
-                    border: `1.5px solid ${infraType === t.id ? '#1a5276' : '#e2e8f0'}`,
-                    background: infraType === t.id ? '#e6f1fb' : '#fff',
+                    border: `1.5px solid ${infraType === item.id ? '#1a5276' : '#e2e8f0'}`,
+                    background: infraType === item.id ? '#e6f1fb' : '#fff',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
                     transition: 'all 0.15s',
                   }}>
-                  <span style={{ fontSize: 22 }}>{t.emoji}</span>
-                  <span style={{ fontSize: 12, fontWeight: 500, color: infraType === t.id ? '#1a5276' : '#475569' }}>{t.label}</span>
+                  <span style={{ fontSize: 22 }}>{item.emoji}</span>
+                  <span style={{ fontSize: 12, fontWeight: 500, color: infraType === item.id ? '#1a5276' : '#475569' }}>
+                    {t(`infrastructureTypes.${item.id}`)}
+                  </span>
                 </button>
               ))}
             </div>
@@ -374,9 +376,9 @@ export default function ReportPage() {
 
           {/* ── SECTION: Photos */}
           <div style={cardStyle}>
-            <SectionLabel icon={<IconCamera />} text="Photo evidence" />
+            <SectionLabel icon={<IconCamera />} text={t('report.section.photos')} />
             <p style={{ fontSize: 12, color: '#64748b', margin: '0 0 12px', lineHeight: 1.5 }}>
-              Upload up to 4 photos. Our AI will automatically analyse them and suggest a damage grade.
+              {t('report.description.photos')}
             </p>
 
             {/* thumb grid */}
@@ -413,32 +415,32 @@ export default function ReportPage() {
                 <input ref={fileRef}   type="file" accept="image/*" multiple           style={{ display: 'none' }} onChange={e => addPhotos(e.target.files)} />
                 <button type="button" onClick={() => cameraRef.current?.click()}
                   style={{ ...uploadBtnStyle, background: '#1a5276', color: '#fff', border: 'none' }}>
-                  <IconCamera /><span style={{ fontSize: 13 }}>Take photo</span>
+                  <IconCamera /><span style={{ fontSize: 13 }}>{t('report.actions.takePhoto')}</span>
                 </button>
                 <button type="button" onClick={() => fileRef.current?.click()}
                   style={{ ...uploadBtnStyle, background: '#fff', color: '#475569', border: '0.5px solid #e2e8f0' }}>
-                  <IconUpload /><span style={{ fontSize: 13 }}>Upload</span>
+                  <IconUpload /><span style={{ fontSize: 13 }}>{t('report.actions.upload')}</span>
                 </button>
               </div>
             )}
 
             <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 8 }}>
-              {photos.length}/4 photos • JPG or PNG • max 10 MB each
+              {t('report.photoFooter', { count: photos.length })}
             </p>
           </div>
 
           {/* ── SECTION: AI Damage Grade */}
           <div style={{ ...cardStyle, border: `1.5px solid ${aiDone ? (grade?.color ?? '#e2e8f0') : '#e2e8f0'}`, transition: 'border-color 0.3s' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-              <SectionLabel icon={<IconSparkle />} text="Damage grade" noMargin />
+              <SectionLabel icon={<IconSparkle />} text={t('report.section.damageGrade')} noMargin />
               <span style={{
                 fontSize: 10, fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase',
                 background: '#e6f1fb', color: '#1a5276', padding: '3px 8px', borderRadius: 20,
-              }}>AI Generated</span>
+              }}>{t('misc.aiGenerated')}</span>
             </div>
 
             <p style={{ fontSize: 12, color: '#64748b', margin: '0 0 14px', lineHeight: 1.5 }}>
-              Our AI analyses your uploaded photos and automatically suggests a damage grade. You can override it if needed.
+              {t('report.description.ai')}
             </p>
 
             {aiLoading && (
@@ -448,7 +450,7 @@ export default function ReportPage() {
                   border: '2px solid #e2e8f0', borderTopColor: '#1a5276',
                   animation: 'spin 0.8s linear infinite', flexShrink: 0,
                 }} />
-                <p style={{ fontSize: 13, color: '#475569', margin: 0 }}>Analysing photos…</p>
+                <p style={{ fontSize: 13, color: '#475569', margin: 0 }}>{t('report.status.analysingPhotos')}</p>
               </div>
             )}
 
@@ -465,15 +467,15 @@ export default function ReportPage() {
                     }}>
                     <div style={{ width: 14, height: 14, borderRadius: '50%', background: g.color, flexShrink: 0 }} />
                     <div style={{ flex: 1 }}>
-                      <p style={{ fontSize: 13, fontWeight: 600, margin: 0, color: '#0f172a' }}>{g.label}</p>
-                      <p style={{ fontSize: 11, color: '#64748b', margin: '2px 0 0' }}>{g.desc}</p>
+                      <p style={{ fontSize: 13, fontWeight: 600, margin: 0, color: '#0f172a' }}>{t(`damageGrades.${g.id}`)}</p>
+                      <p style={{ fontSize: 11, color: '#64748b', margin: '2px 0 0' }}>{t(`damageGrades.${g.id}Description`)}</p>
                     </div>
                     {damageGrade === g.id && (
                       <svg width="16" height="16" viewBox="0 0 24 24" fill={g.color}><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
                     )}
                     {damageGrade === g.id && aiDone && (
                       <span style={{ fontSize: 10, background: '#e6f1fb', color: '#1a5276', padding: '2px 7px', borderRadius: 20, fontWeight: 600, whiteSpace: 'nowrap' }}>
-                        AI pick
+                        {t('report.actions.aiPick')}
                       </span>
                     )}
                   </button>
@@ -483,7 +485,7 @@ export default function ReportPage() {
 
             {!aiDone && !aiLoading && (
               <p style={{ fontSize: 12, color: '#94a3b8', textAlign: 'center', marginTop: 10 }}>
-                Upload a photo above to enable AI classification
+                {t('report.description.uploadPrompt')}
               </p>
             )}
           </div>
@@ -503,13 +505,13 @@ export default function ReportPage() {
             {submitting
               ? <>
                   <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', animation: 'spin 0.8s linear infinite' }} />
-                  Submitting…
+                  {t('report.actions.submitting')}
                 </>
               : <>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
                   </svg>
-                  SUBMIT REPORT
+                  {t('report.actions.submitReport')}
                 </>
             }
           </button>
