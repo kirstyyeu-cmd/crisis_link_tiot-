@@ -1,0 +1,189 @@
+{
+  "home": {
+    "title": "欢迎来到 Crisis Link",
+    "subtitle": "使用下面的链接打开 UNDP 创建账户页面。",
+    "createAccountButton": "前往创建账户"
+  },
+  "createAccount": {
+    "brand": "UNDP",
+    "title": "Create your account",
+    "subtitle": "Join the UNDP community with a secure account. No images, just clean access.",
+    "fields": {
+      "name": "Full name",
+      "namePlaceholder": "Enter your full name",
+      "email": "Email address",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "Create a password",
+      "confirmPassword": "Confirm password",
+      "confirmPasswordPlaceholder": "Repeat password",
+      "organization": "Organization",
+      "organizationPlaceholder": "Your organization",
+      "country": "Country",
+      "countryPlaceholder": "Country or region"
+    },
+    "actions": {
+      "createAccount": "Create account"
+    },
+    "footer": {
+      "haveAccount": "Already have an account?",
+      "login": "Log in"
+    }
+  },
+  "community": {
+    "portalTitle": "Community Portal",
+    "portalTagline": "CRISIS IMPACT REPORTER",
+    "menu": {
+      "reportIncident": "Report Incident",
+      "reportIncidentSubtitle": "Send a new damage report",
+      "myReports": "My Reports",
+      "myReportsSubtitle": "View your previous submissions",
+      "trackReport": "Track Report",
+      "trackReportSubtitle": "Check status of an issue"
+    },
+    "offlineBanner": {
+      "message": "⚠️ You are offline — report saved locally",
+      "pendingSync": "2 Pending Sync"
+    }
+  },
+  "login": {
+    "title": "Crisis Reporting Tool",
+    "subtitle": "UNDP PARTNER PORTAL",
+    "fields": {
+      "username": "User Name",
+      "usernamePlaceholder": "Enter username",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••"
+    },
+    "actions": {
+      "signIn": "Sign In",
+      "createAccount": "Create Account"
+    },
+    "links": {
+      "forgotPassword": "Forgot Password? Click here"
+    },
+    "label": "NEW USER?"
+  },
+  "track": {
+    "label": "Track report",
+    "title": "Where is your report?",
+    "subtitle": "Enter your report reference number to see the latest status and photo evidence.",
+    "inputPlaceholder": "Enter reference number",
+    "button": "Track",
+    "links": {
+      "submitNewReport": "Submit new report",
+      "viewPastReports": "View past reports"
+    },
+    "report": {
+      "reference": "Reference",
+      "status": "Status",
+      "date": "Date",
+      "location": "Location",
+      "resolved": "Resolved",
+      "yes": "Yes",
+      "no": "No",
+      "note": "Your report is being reviewed by the response team and will be updated soon.",
+      "imageAlt": "Tracked report photo {{index}}",
+      "statusFlow": {
+        "submitted": "Submitted",
+        "underReview": "Under review",
+        "responded": "Responded",
+        "resolved": "Resolved"
+      }
+    }
+  },
+  "myReports": {
+    "title": "My Reports",
+    "subtitle": "Review past submissions, resolve status, and inspect photo evidence for each report.",
+    "actions": {
+      "newReport": "New report",
+      "trackReport": "Track report"
+    },
+    "fields": {
+      "reference": "Reference",
+      "date": "Date",
+      "location": "Location",
+      "status": "Status",
+      "resolved": "Resolved",
+      "ongoing": "Ongoing"
+    }
+  },
+  "report": {
+    "header": {
+      "title": "REPORT AN INCIDENT",
+      "subtitle": "Crisis Impact Reporter"
+    },
+    "section": {
+      "location": "Location",
+      "infrastructure": "Infrastructure type",
+      "photos": "Photo evidence",
+      "damageGrade": "Damage grade",
+      "status": "Status"
+    },
+    "placeholders": {
+      "location": "Search address or landmark…"
+    },
+    "locationCaptured": "Location captured",
+    "description": {
+      "photos": "Upload up to 4 photos. Our AI will automatically analyse them and suggest a damage grade.",
+      "ai": "Our AI analyses your uploaded photos and automatically suggests a damage grade. You can override it if needed.",
+      "uploadPrompt": "Upload a photo above to enable AI classification"
+    },
+    "actions": {
+      "takePhoto": "Take photo",
+      "upload": "Upload",
+      "aiPick": "AI pick",
+      "submitReport": "SUBMIT REPORT",
+      "submitting": "Submitting…",
+      "submitAnother": "Submit another report",
+      "goHome": "Go to home"
+    },
+    "alerts": {
+      "addLocation": "Please add a location.",
+      "selectInfrastructure": "Please select an infrastructure type.",
+      "uploadPhoto": "Please upload at least one photo.",
+      "geolocationUnsupported": "Geolocation not supported.",
+      "geolocationFailed": "Could not get location. Please type it manually."
+    },
+    "status": {
+      "submitted": "Submitted",
+      "underReview": "Under review",
+      "responded": "Responded",
+      "resolved": "Resolved",
+      "progressInfo": "Report progress",
+      "submittedInfo": "Just now — report received",
+      "underReviewInfo": "A responder is being assigned",
+      "respondedInfo": "Action taken on the ground",
+      "resolvedInfo": "Issue fully addressed",
+      "analysingPhotos": "Analysing photos…"
+    },
+    "success": {
+      "title": "Report Submitted!",
+      "subtitle": "Your report has been received and is under review.",
+      "saveReference": "Save this reference number to track your report",
+      "photosAttached": "Photos attached",
+      "reEscalation": "If no response is received within 48 hours, your report will be automatically re-escalated."
+    },
+    "photoFooter": "{{count}}/4 photos • JPG or PNG • max 10 MB each"
+  },
+  "damageGrades": {
+    "minimal": "Minimal",
+    "partial": "Partial",
+    "destroyed": "Completely Destroyed",
+    "minimalDescription": "Minor damage, still functional",
+    "partialDescription": "Significant damage, limited use",
+    "destroyedDescription": "Total loss, not functional"
+  },
+  "infrastructureTypes": {
+    "road": "Road",
+    "building": "Building",
+    "bridge": "Bridge",
+    "water": "Water",
+    "power": "Power",
+    "other": "Other"
+  },
+  "misc": {
+    "gps": "GPS",
+    "aiGenerated": "AI Generated"
+  }
+}
