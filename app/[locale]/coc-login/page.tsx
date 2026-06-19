@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AlertTriangle, Lock, LogIn, Eye, EyeOff, AlertCircle } from 'lucide-react';
-import { useTranslate } from '@tolgee/react';
+import { useTranslations } from 'next-intl';
 
 const AUTHORISED_USERS = [
   { username: "undp.staff1", password: "COC@2026#One"   },
@@ -12,7 +12,7 @@ const AUTHORISED_USERS = [
 ];
 
 export default function COCLoginPage() {
-  const { t } = useTranslate();
+  const t = useTranslations();
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');

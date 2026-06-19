@@ -2,10 +2,9 @@
 import React from 'react';
 import Link from 'next/link';
 import { MapPin } from 'lucide-react';
-import { useTranslate } from '@tolgee/react';
-
+import { useTranslations } from 'next-intl';
 export default function CommunityLoginPage() {
-  const { t } = useTranslate();
+  const t = useTranslations();
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-blue-900 p-4 font-sans">

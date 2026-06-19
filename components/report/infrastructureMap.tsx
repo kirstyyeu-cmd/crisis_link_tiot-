@@ -1,9 +1,10 @@
 'use client';
-import { useTranslate } from '@tolgee/react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import { fetchInfrastructure, osmToGeoJSON, InfraType } from '@/lib/overpass';
 import type * as GeoJSON from 'geojson';
+
 
 
 interface Props {
@@ -24,6 +25,7 @@ export default function InfrastructureMap({ lat, lng, selectedInfraType, onFeatu
   const map          = useRef<maplibregl.Map | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState('');
+  
 
   // ── Define functions first ──────────────────────────────────────────
 
@@ -186,7 +188,8 @@ export default function InfrastructureMap({ lat, lng, selectedInfraType, onFeatu
     filterByInfraType(selectedInfraType);
   }, [selectedInfraType]);
 
-  const { t } = useTranslate();
+  const t = useTranslations();
+
 
   return (
     
