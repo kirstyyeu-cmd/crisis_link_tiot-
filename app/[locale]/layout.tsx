@@ -1,6 +1,4 @@
-import { AppTolgeeProvider } from '@/tolgee/provider';
 import { ALL_LOCALES } from '@/tolgee/config';
-import type { TolgeeStaticDataProp } from '@tolgee/react';
 import { notFound } from 'next/navigation';
 
 export function generateStaticParams() {
@@ -18,24 +16,5 @@ export default async function LocaleLayout({
 
   if (!ALL_LOCALES.includes(locale)) notFound();
 
-  let staticData: TolgeeStaticDataProp = {};
-  try {
-    staticData = {
-      [locale]: (await import(`../../messages/${locale}.json`)).default,
-    };
-  } catch {
-    staticData = {
-      en: (await import('../../messages/en.json')).default,
-    };
-  }
-
-  return (
-    <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-      <body>
-        <AppTolgeeProvider locale={locale} staticData={staticData}>
-          {children}
-        </AppTolgeeProvider>
-      </body>
-    </html>
-  );
+  return <>{children}</>;
 }

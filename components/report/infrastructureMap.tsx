@@ -1,8 +1,10 @@
 'use client';
+import { useTranslate } from '@tolgee/react';
 import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import { fetchInfrastructure, osmToGeoJSON, InfraType } from '@/lib/overpass';
 import type * as GeoJSON from 'geojson';
+
 
 interface Props {
   lat: number;
@@ -14,6 +16,8 @@ interface Props {
     coordinates: [number, number];
   }) => void;
 }
+
+
 
 export default function InfrastructureMap({ lat, lng, selectedInfraType, onFeatureSelect }: Props) {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -182,18 +186,19 @@ export default function InfrastructureMap({ lat, lng, selectedInfraType, onFeatu
     filterByInfraType(selectedInfraType);
   }, [selectedInfraType]);
 
-  // ── Render ──────────────────────────────────────────────────────────
+  const { t } = useTranslate();
 
   return (
+    
     <div className="space-y-2">
       {loading && (
         <div className="flex items-center gap-2 px-1">
           <div className="w-3 h-3 border-2 border-slate-300 border-t-blue-900 rounded-full animate-spin" />
-          <p className="text-slate-500 text-xs font-semibold">Loading infrastructure data...</p>
+          <p className="text-slate-500 text-xs font-semibold">{t('report.loadingInfra')}</p>
         </div>
       )}
       {error && (
-        <p className="text-orange-600 text-xs font-semibold px-1">{error}</p>
+        <p className="text-orange-600 text-xs font-semibold px-1">{t('report.mapError')}</p>
       )}
       <div
         ref={mapContainer}
@@ -201,7 +206,7 @@ export default function InfrastructureMap({ lat, lng, selectedInfraType, onFeatu
         style={{ height: '350px' }}
       />
       <p className="text-slate-400 text-xs font-medium px-1">
-        Tap a highlighted feature on the map to select it
+        {t('report.mapTip')}
       </p>
     </div>
   );
