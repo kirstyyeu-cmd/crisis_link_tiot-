@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTolgee, useTranslate } from '@tolgee/react';
 import { ChevronDown } from 'lucide-react';
 
@@ -12,6 +12,7 @@ const languageOptions = [
   { code: 'ru', label: 'Русский', short: 'RU' },
   { code: 'es', label: 'Español', short: 'ES' },
 ];
+const storageKey = 'crisis-link-language';
 
 export default function HomePage() {
   const { t } = useTranslate();
@@ -20,6 +21,25 @@ export default function HomePage() {
 
   const currentLanguage =
     languageOptions.find((option) => option.code === tolgee.getLanguage()) ?? languageOptions[0];
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const current = tolgee.getLanguage();
+      window.localStorage.setItem(storageKey, current);
+      document.documentElement.lang = current;
+      document.documentElement.dir = current === 'ar' ? 'rtl' : 'ltr';
+    }
+  }, [tolgee]);
+
+  function handleLanguageChange(code: string) {
+    tolgee.changeLanguage(code);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(storageKey, code);
+      document.documentElement.lang = code;
+      document.documentElement.dir = code === 'ar' ? 'rtl' : 'ltr';
+    }
+    setIsOpen(false);
+  }
 
   return (
     <main className="relative min-h-screen bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
@@ -42,10 +62,7 @@ export default function HomePage() {
                 <button
                   key={option.code}
                   type="button"
-                  onClick={() => {
-                    tolgee.changeLanguage(option.code);
-                    setIsOpen(false);
-                  }}
+                  onClick={() => handleLanguageChange(option.code)}
                   className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm ${
                     currentLanguage.code === option.code
                       ? 'bg-orange-50 text-orange-700'

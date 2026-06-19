@@ -6,184 +6,184 @@
   },
   "createAccount": {
     "brand": "UNDP",
-    "title": "Create your account",
-    "subtitle": "Join the UNDP community with a secure account. No images, just clean access.",
+    "title": "إنشاء حسابك",
+    "subtitle": "انضم إلى مجتمع UNDP من خلال حساب آمن. لا توجد صور، بل وصول نظيف فقط.",
     "fields": {
-      "name": "Full name",
-      "namePlaceholder": "Enter your full name",
-      "email": "Email address",
+      "name": "الاسم الكامل",
+      "namePlaceholder": "أدخل اسمك الكامل",
+      "email": "عنوان البريد الإلكتروني",
       "emailPlaceholder": "you@example.com",
-      "password": "Password",
-      "passwordPlaceholder": "Create a password",
-      "confirmPassword": "Confirm password",
-      "confirmPasswordPlaceholder": "Repeat password",
-      "organization": "Organization",
-      "organizationPlaceholder": "Your organization",
-      "country": "Country",
-      "countryPlaceholder": "Country or region"
+      "password": "كلمة المرور",
+      "passwordPlaceholder": "أنشئ كلمة مرور",
+      "confirmPassword": "تأكيد كلمة المرور",
+      "confirmPasswordPlaceholder": "كرر كلمة المرور",
+      "organization": "المنظمة",
+      "organizationPlaceholder": "منظمتك",
+      "country": "الدولة",
+      "countryPlaceholder": "الدولة أو المنطقة"
     },
     "actions": {
-      "createAccount": "Create account"
+      "createAccount": "إنشاء الحساب"
     },
     "footer": {
-      "haveAccount": "Already have an account?",
-      "login": "Log in"
+      "haveAccount": "هل لديك حساب بالفعل؟",
+      "login": "تسجيل الدخول"
     }
   },
   "community": {
-    "portalTitle": "Community Portal",
-    "portalTagline": "CRISIS IMPACT REPORTER",
+    "portalTitle": "بوابة المجتمع",
+    "portalTagline": "مُبلغ تأثيرات الأزمة",
     "menu": {
-      "reportIncident": "Report Incident",
-      "reportIncidentSubtitle": "Send a new damage report",
-      "myReports": "My Reports",
-      "myReportsSubtitle": "View your previous submissions",
-      "trackReport": "Track Report",
-      "trackReportSubtitle": "Check status of an issue"
+      "reportIncident": "الإبلاغ عن حادث",
+      "reportIncidentSubtitle": "أرسل تقريرًا جديدًا عن الضرر",
+      "myReports": "تقاريري",
+      "myReportsSubtitle": "عرض تقاريرك السابقة",
+      "trackReport": "متابعة التقرير",
+      "trackReportSubtitle": "تحقق من حالة المشكلة"
     },
     "offlineBanner": {
-      "message": "⚠️ You are offline — report saved locally",
-      "pendingSync": "2 Pending Sync"
+      "message": "⚠️ أنت غير متصل — تم حفظ التقرير محليًا",
+      "pendingSync": "2 في الانتظار"
     }
   },
   "login": {
-    "title": "Crisis Reporting Tool",
-    "subtitle": "UNDP PARTNER PORTAL",
+    "title": "أداة الإبلاغ عن الأزمات",
+    "subtitle": "بوابة الشركاء في UNDP",
     "fields": {
-      "username": "User Name",
-      "usernamePlaceholder": "Enter username",
-      "password": "Password",
+      "username": "اسم المستخدم",
+      "usernamePlaceholder": "أدخل اسم المستخدم",
+      "password": "كلمة المرور",
       "passwordPlaceholder": "••••••••"
     },
     "actions": {
-      "signIn": "Sign In",
-      "createAccount": "Create Account"
+      "signIn": "تسجيل الدخول",
+      "createAccount": "إنشاء حساب"
     },
     "links": {
-      "forgotPassword": "Forgot Password? Click here"
+      "forgotPassword": "هل نسيت كلمة المرور؟ انقر هنا"
     },
-    "label": "NEW USER?"
+    "label": "مستخدم جديد؟"
   },
   "track": {
-    "label": "Track report",
-    "title": "Where is your report?",
-    "subtitle": "Enter your report reference number to see the latest status and photo evidence.",
-    "inputPlaceholder": "Enter reference number",
-    "button": "Track",
+    "label": "متابعة التقرير",
+    "title": "أين تقريرك؟",
+    "subtitle": "أدخل رقم المرجع الخاص بك لمعرفة أحدث الحالة والأدلة الفوتوغرافية.",
+    "inputPlaceholder": "أدخل رقم المرجع",
+    "button": "متابعة",
     "links": {
-      "submitNewReport": "Submit new report",
-      "viewPastReports": "View past reports"
+      "submitNewReport": "إرسال تقرير جديد",
+      "viewPastReports": "عرض التقارير السابقة"
     },
     "report": {
-      "reference": "Reference",
-      "status": "Status",
-      "date": "Date",
-      "location": "Location",
-      "resolved": "Resolved",
-      "yes": "Yes",
-      "no": "No",
-      "note": "Your report is being reviewed by the response team and will be updated soon.",
-      "imageAlt": "Tracked report photo {{index}}",
+      "reference": "المرجع",
+      "status": "الحالة",
+      "date": "التاريخ",
+      "location": "الموقع",
+      "resolved": "تم الحل",
+      "yes": "نعم",
+      "no": "لا",
+      "note": "يتم مراجعة تقريرك من قبل فريق الاستجابة وسيتم تحديثه قريبًا.",
+      "imageAlt": "صورة التقرير المتابعة {{index}}",
       "statusFlow": {
-        "submitted": "Submitted",
-        "underReview": "Under review",
-        "responded": "Responded",
-        "resolved": "Resolved"
+        "submitted": "تم الإرسال",
+        "underReview": "قيد المراجعة",
+        "responded": "تم الرد",
+        "resolved": "تم الحل"
       }
     }
   },
   "myReports": {
-    "title": "My Reports",
-    "subtitle": "Review past submissions, resolve status, and inspect photo evidence for each report.",
+    "title": "تقاريري",
+    "subtitle": "راجع التقارير السابقة، وتحقق من الحالة، وافحص أدلة الصور لكل تقرير.",
     "actions": {
-      "newReport": "New report",
-      "trackReport": "Track report"
+      "newReport": "تقرير جديد",
+      "trackReport": "متابعة التقرير"
     },
     "fields": {
-      "reference": "Reference",
-      "date": "Date",
-      "location": "Location",
-      "status": "Status",
-      "resolved": "Resolved",
-      "ongoing": "Ongoing"
+      "reference": "المرجع",
+      "date": "التاريخ",
+      "location": "الموقع",
+      "status": "الحالة",
+      "resolved": "تم الحل",
+      "ongoing": "قيد التنفيذ"
     }
   },
   "report": {
     "header": {
-      "title": "REPORT AN INCIDENT",
-      "subtitle": "Crisis Impact Reporter"
+      "title": "الإبلاغ عن حادث",
+      "subtitle": "مُبلغ تأثيرات الأزمة"
     },
     "section": {
-      "location": "Location",
-      "infrastructure": "Infrastructure type",
-      "photos": "Photo evidence",
-      "damageGrade": "Damage grade",
-      "status": "Status"
+      "location": "الموقع",
+      "infrastructure": "نوع البنية التحتية",
+      "photos": "أدلة الصور",
+      "damageGrade": "درجة الضرر",
+      "status": "الحالة"
     },
     "placeholders": {
-      "location": "Search address or landmark…"
+      "location": "ابحث عن عنوان أو علامة مميزة…"
     },
-    "locationCaptured": "Location captured",
+    "locationCaptured": "تم التقاط الموقع",
     "description": {
-      "photos": "Upload up to 4 photos. Our AI will automatically analyse them and suggest a damage grade.",
-      "ai": "Our AI analyses your uploaded photos and automatically suggests a damage grade. You can override it if needed.",
-      "uploadPrompt": "Upload a photo above to enable AI classification"
+      "photos": "ارفع ما يصل إلى 4 صور. سيقوم الذكاء الاصطناعي بتحليلها تلقائيًا واقتراح درجة الضرر.",
+      "ai": "يقوم الذكاء الاصطناعي بتحليل الصور التي ترفعها واقتراح درجة الضرر تلقائيًا. يمكنك تجاوزها إذا لزم الأمر.",
+      "uploadPrompt": "قم بتحميل صورة أعلاه لتمكين تصنيف الذكاء الاصطناعي"
     },
     "actions": {
-      "takePhoto": "Take photo",
-      "upload": "Upload",
-      "aiPick": "AI pick",
-      "submitReport": "SUBMIT REPORT",
-      "submitting": "Submitting…",
-      "submitAnother": "Submit another report",
-      "goHome": "Go to home"
+      "takePhoto": "التقاط صورة",
+      "upload": "رفع",
+      "aiPick": "اختيار الذكاء الاصطناعي",
+      "submitReport": "إرسال التقرير",
+      "submitting": "جارٍ الإرسال…",
+      "submitAnother": "إرسال تقرير آخر",
+      "goHome": "العودة إلى الصفحة الرئيسية"
     },
     "alerts": {
-      "addLocation": "Please add a location.",
-      "selectInfrastructure": "Please select an infrastructure type.",
-      "uploadPhoto": "Please upload at least one photo.",
-      "geolocationUnsupported": "Geolocation not supported.",
-      "geolocationFailed": "Could not get location. Please type it manually."
+      "addLocation": "يرجى إضافة موقع.",
+      "selectInfrastructure": "يرجى اختيار نوع البنية التحتية.",
+      "uploadPhoto": "يرجى رفع صورة واحدة على الأقل.",
+      "geolocationUnsupported": "الموقع الجغرافي غير مدعوم.",
+      "geolocationFailed": "تعذر الحصول على الموقع. يرجى كتابته يدويًا."
     },
     "status": {
-      "submitted": "Submitted",
-      "underReview": "Under review",
-      "responded": "Responded",
-      "resolved": "Resolved",
-      "progressInfo": "Report progress",
-      "submittedInfo": "Just now — report received",
-      "underReviewInfo": "A responder is being assigned",
-      "respondedInfo": "Action taken on the ground",
-      "resolvedInfo": "Issue fully addressed",
-      "analysingPhotos": "Analysing photos…"
+      "submitted": "تم الإرسال",
+      "underReview": "قيد المراجعة",
+      "responded": "تم الرد",
+      "resolved": "تم الحل",
+      "progressInfo": "تقدم التقرير",
+      "submittedInfo": "الآن — تم استلام التقرير",
+      "underReviewInfo": "جارٍ تعيين موظف استجابة",
+      "respondedInfo": "تم اتخاذ إجراء على الأرض",
+      "resolvedInfo": "تم حل المشكلة بالكامل",
+      "analysingPhotos": "جارٍ تحليل الصور…"
     },
     "success": {
-      "title": "Report Submitted!",
-      "subtitle": "Your report has been received and is under review.",
-      "saveReference": "Save this reference number to track your report",
-      "photosAttached": "Photos attached",
-      "reEscalation": "If no response is received within 48 hours, your report will be automatically re-escalated."
+      "title": "تم إرسال التقرير!",
+      "subtitle": "تم استلام تقريرك وهو قيد المراجعة.",
+      "saveReference": "احفظ رقم المرجع هذا لتتبع تقريرك",
+      "photosAttached": "الصور المرفقة",
+      "reEscalation": "إذا لم يتم استلام أي رد خلال 48 ساعة، فسيتم إعادة تصعيد التقرير تلقائيًا."
     },
-    "photoFooter": "{{count}}/4 photos • JPG or PNG • max 10 MB each"
+    "photoFooter": "{{count}}/4 صور • JPG أو PNG • أقصى 10 ميغابايت لكل صورة"
   },
   "damageGrades": {
-    "minimal": "Minimal",
-    "partial": "Partial",
-    "destroyed": "Completely Destroyed",
-    "minimalDescription": "Minor damage, still functional",
-    "partialDescription": "Significant damage, limited use",
-    "destroyedDescription": "Total loss, not functional"
+    "minimal": "ضئيل",
+    "partial": "جزئي",
+    "destroyed": "مدمر بالكامل",
+    "minimalDescription": "أضرار طفيفة، لا تزال قابلة للاستخدام",
+    "partialDescription": "أضرار كبيرة، استخدام محدود",
+    "destroyedDescription": "خسارة كاملة، غير قابل للاستخدام"
   },
   "infrastructureTypes": {
-    "road": "Road",
-    "building": "Building",
-    "bridge": "Bridge",
-    "water": "Water",
-    "power": "Power",
-    "other": "Other"
+    "road": "طريق",
+    "building": "مبنى",
+    "bridge": "جسر",
+    "water": "ماء",
+    "power": "طاقة",
+    "other": "أخرى"
   },
   "misc": {
     "gps": "GPS",
-    "aiGenerated": "AI Generated"
+    "aiGenerated": "مولّد بالذكاء الاصطناعي"
   }
 }
