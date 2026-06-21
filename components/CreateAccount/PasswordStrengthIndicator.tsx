@@ -1,13 +1,13 @@
 "use client";
 import { getPasswordStrength } from "./formValidation";
-import { useTranslate } from '@tolgee/react';
+import { useTranslations} from 'next-intl';
 
 interface PasswordStrengthIndicatorProps {
   password: string;
 }
 
 export default function PasswordStrengthIndicator({ password }: PasswordStrengthIndicatorProps) {
-  const { t } = useTranslate();
+  const t = useTranslations();
   const { score, label, color } = getPasswordStrength(password);
 
   return (
