@@ -16,9 +16,9 @@ export default function LandingPage() {
     { type: "info", titleKey: "landing.slide2Title", descKey: "landing.slide2Desc", icon: <ClipboardList className="w-12 h-12 text-white" /> },
     { type: "info", titleKey: "landing.slide3Title", descKey: "landing.slide3Desc", icon: <WifiOff className="w-12 h-12 text-white" /> },
     { type: "info", titleKey: "landing.slide4Title", descKey: "landing.slide4Desc", icon: <Map className="w-12 h-12 text-white" /> },
-    { type: "photo", image: "/slides/flood.jpg",      titleKey: "landing.slide5Title", descKey: "landing.slide5Desc" },
-    { type: "photo", image: "/slides/earthquake.jpg", titleKey: "landing.slide6Title", descKey: "landing.slide6Desc" },
-    { type: "photo", image: "/slides/road.jpg",       titleKey: "landing.slide7Title", descKey: "landing.slide7Desc" },
+    { type: "photo", image: "/images/flooding.jpg",  titleKey: "landing.slide5Title", descKey: "landing.slide5Desc" },
+    { type: "photo", image: "/images/fire.jpg",      titleKey: "landing.slide2Title", descKey: "landing.slide2Desc" },
+    { type: "photo", image: "/images/road.jpg",      titleKey: "landing.slide4Title", descKey: "landing.slide4Desc" },
   ];
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function LandingPage() {
 
       <div className="relative z-10 w-full max-w-md px-6 flex flex-col items-center text-center">
 
-        {/* Logo */}
+        {/* Logo - Restored original SVG icon */}
         <div className="mb-6">
           <div className="w-20 h-20 border-4 border-white rounded-full flex items-center justify-center bg-blue-800">
             <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,11 +117,11 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Footer */}
+        {/* Footer - Replaced text box with official badge image */}
         <div className="mt-8 mb-4">
           <p className="text-slate-400 text-xs mb-2">{t('landing.connecting')}</p>
           <div className="flex items-center justify-center">
-            <div className="bg-blue-600 text-white text-[10px] px-2 py-1 font-black leading-tight">UN<br />DP</div>
+            <img src="/UNDP.png" alt="UNDP Logo" className="h-8 w-auto object-contain" />
           </div>
         </div>
       </div>

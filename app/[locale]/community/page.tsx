@@ -12,9 +12,9 @@ const slides = [
   { type: "info", titleKey: "community.title",    descKey: "community.welcomeSub",   bgClass: "bg-blue-900" },
   { type: "info", titleKey: "community.tabReport", descKey: "community.welcomeSub",  bgClass: "bg-blue-800" },
   { type: "info", titleKey: "community.offline",   descKey: "community.noNotifDesc", bgClass: "bg-slate-800" },
-  { type: "photo", image: "/slides/flood.jpg",      titleKey: "community.title",     descKey: "community.welcomeSub" },
-  { type: "photo", image: "/slides/earthquake.jpg", titleKey: "community.title",     descKey: "community.welcomeSub" },
-  { type: "photo", image: "/slides/road.jpg",       titleKey: "community.title",     descKey: "community.welcomeSub" },
+  { type: "photo", image: "/images/power.jpg",     titleKey: "community.tabAlerts",  descKey: "community.notif1Desc" },
+  { type: "photo", image: "/images/water.jpg",     titleKey: "community.tabHome",    descKey: "community.notif2Desc" },
+  { type: "photo", image: "/images/com-road.jpg",  titleKey: "community.tabMyReports", descKey: "community.welcomeSub" },
 ];
 
 const notifications = [
@@ -47,8 +47,9 @@ export default function CommunityHome() {
 
         <div className="px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center font-black text-blue-900 text-[10px] leading-tight text-center shadow">
-              UN<br />DP
+            {/* Logo - Replaced custom text block with UNDP official badge image */}
+            <div className="bg-white p-1 rounded-lg flex items-center justify-center shadow">
+              <img src="/UNDP.png" alt="UNDP Logo" className="h-8 w-auto object-contain" />
             </div>
             <div>
               <h1 className="text-white font-black text-base uppercase tracking-tight leading-none">
@@ -143,10 +144,15 @@ export default function CommunityHome() {
             </Link>
 
             {/* Slideshow */}
-            <div className="flex-grow relative rounded-2xl overflow-hidden border border-slate-100 shadow-lg" style={{ minHeight: "240px" }}>
+            <div className="grow relative rounded-2xl overflow-hidden border border-slate-100 shadow-lg" style={{ minHeight: "240px" }}>
               {slide.type === "photo" ? (
                 <div className="relative w-full h-full" style={{ minHeight: "240px" }}>
-                  <img src={slide.image} alt={t(slide.titleKey)} className="absolute inset-0 w-full h-full object-cover" />
+                  <img src={slide.image} alt={t(slide.titleKey)} className="absolute inset-0 w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }} 
+                  />
+                  {/*Fallback backgroud if image fails*/}
                   <div className="absolute inset-0 bg-gradient-to-t from-blue-900/90 via-blue-900/30 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-5 text-left">
                     <h3 className="text-white font-black uppercase text-base">{t(slide.titleKey)}</h3>
