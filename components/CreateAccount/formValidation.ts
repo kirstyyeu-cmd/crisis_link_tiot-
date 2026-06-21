@@ -57,25 +57,25 @@ export const validateConfirmPassword = (
 
 export const getPasswordStrength = (password: string): PasswordStrength => {
   if (!password) {
-    return { score: 0, label: "Too weak", color: "bg-red-500" };
+    return { score: 1, label: "Too weak", color: "bg-red-500" };
   }
 
-  let score = 0;
-  let hasLowercase = /[a-z]/.test(password);
-  let hasUppercase = /[A-Z]/.test(password);
-  let hasNumbers = /\d/.test(password);
-  let hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+  // Define each criterion validation check as a boolean flag
+  const criteria = [
+    /[a-z]/.test(password),
+    /[A-Z]/.test(password),
+    /\d/.test(password),
+    /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+  ];
 
-  if (hasLowercase) score++;
-  if (hasUppercase) score++;
-  if (hasNumbers) score++;
-  if (hasSpecialChar) score++;
+  // Count criteria met using a pure array reduce (with const accumulator)
+  const baseScore = criteria.reduce((acc, met) => acc + (met ? 1 : 0), 0);
+  
+  // Calculate potential bonus points if length is 12 or more without mutating a variable
+  const score = password.length >= 12 ? Math.min(baseScore + 1, 4) : baseScore;
 
-  if (password.length >= 12) {
-    score = Math.min(score + 1, 4);
-  }
-
-  const strengthMap = {
+  // Immutably structure score translations using an object mapping lookup
+  const strengthMap: Record<number, { label: string; color: string }> = {
     0: { label: "Too weak", color: "bg-red-500" },
     1: { label: "Weak", color: "bg-orange-500" },
     2: { label: "Fair", color: "bg-yellow-500" },
@@ -83,7 +83,13 @@ export const getPasswordStrength = (password: string): PasswordStrength => {
     4: { label: "Strong", color: "bg-green-500" },
   };
 
-  return { score: Math.max(1, score), ...strengthMap[score as keyof typeof strengthMap] };
+  // Ensure score constraints fallback within bounds securely
+  const finalScore = Math.max(1, score);
+
+  return {
+    score: finalScore,
+    ...strengthMap[finalScore as keyof typeof strengthMap],
+  };
 };
 
 export const validateForm = (formData: {
@@ -95,18 +101,13 @@ export const validateForm = (formData: {
   const errors: FormErrors = {};
 
   const fullNameError = validateFullName(formData.fullName);
-  if (fullNameError) errors.fullName = fullNameError;
-
   const emailError = validateEmail(formData.email);
-  if (emailError) errors.email = emailError;
-
   const passwordError = validatePassword(formData.password);
-  if (passwordError) errors.password = passwordError;
+  const confirmPasswordError = validateConfirmPassword(formData.password, formData.confirmPassword);
 
-  const confirmPasswordError = validateConfirmPassword(
-    formData.password,
-    formData.confirmPassword
-  );
+  if (fullNameError) errors.fullName = fullNameError;
+  if (emailError) errors.email = emailError;
+  if (passwordError) errors.password = passwordError;
   if (confirmPasswordError) errors.confirmPassword = confirmPasswordError;
 
   return errors;
