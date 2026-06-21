@@ -3,11 +3,11 @@ import { useState } from "react";
 import Image from "next/image";
 import { validateForm, FormErrors } from "./formValidation";
 import PasswordStrengthIndicator from "./PasswordStrengthIndicator";
-import { CheckCircle, AlertTriangle, Users, Loader } from 'lucide-react';
-import { useTranslate } from '@tolgee/react';
+import { CheckCircle, AlertTriangle, Users, Loader, Link } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export default function CreateAccount() {
-  const { t } = useTranslate();
+  const t  = useTranslations();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -218,9 +218,9 @@ export default function CreateAccount() {
 
             <p className="text-center text-gray-600 text-sm mt-6">
               {t('createAccount.alreadyHave')}{" "}
-              <a href="/login" className="text-blue-900 hover:text-blue-700 font-bold">
+              <Link href="/login" className="text-blue-900 hover:text-blue-700 font-bold">
                 {t('createAccount.signIn')}
-              </a>
+              </Link>
             </p>
           </div>
         </div>
