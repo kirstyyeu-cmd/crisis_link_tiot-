@@ -2,10 +2,10 @@
 import { useState } from "react";
 import { validateSignInForm, SignInErrors } from "./signInValidation";
 import { AlertTriangle, LogIn, Loader, Lock, Link } from 'lucide-react';
-import { useTranslate } from '@tolgee/react';
+import { useTranslations } from 'next-intl';
 
 export default function SignIn() {
-  const { t } = useTranslate();
+  const t = useTranslations();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors]     = useState<SignInErrors>({});
   const [touched, setTouched]   = useState<Record<string, boolean>>({});
@@ -118,9 +118,9 @@ export default function SignIn() {
                   <label htmlFor="password" className="block text-sm font-semibold text-blue-900">
                     {t('signIn.passwordLabel')}
                   </label>
-                  <a href="/forgot-password" className="text-xs text-orange-500 hover:text-orange-600 font-medium">
+                  <Link href="/forgot-password" className="text-xs text-orange-500 hover:text-orange-600 font-medium">
                     {t('signIn.forgotPassword')}
-                  </a>
+                  </Link>
                 </div>
                 <input
                   type="password" id="password" name="password"
