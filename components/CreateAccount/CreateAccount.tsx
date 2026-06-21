@@ -4,7 +4,7 @@ import Image from "next/image";
 import { validateForm, FormErrors } from "./formValidation";
 import PasswordStrengthIndicator from "./PasswordStrengthIndicator";
 import { CheckCircle, AlertTriangle, Users, Loader, Link } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations} from 'next-intl';
 
 export default function CreateAccount() {
   const t  = useTranslations();
