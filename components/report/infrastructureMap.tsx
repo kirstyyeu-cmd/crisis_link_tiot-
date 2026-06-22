@@ -14,17 +14,16 @@ interface Props {
     osm_id: string;
     infra_type: string;
     coordinates: [number, number];
+    readable_name?: string;
   }) => void;
 }
 
-// ── Text Location Fallback ─────────────────────────────────────
 function TextLocationFallback({ t }: { t: ReturnType<typeof useTranslations> }) {
   const [expanded, setExpanded] = useState(false);
   const [description, setDescription] = useState('');
 
   return (
     <div className="border-2 border-dashed border-slate-200 rounded-2xl overflow-hidden">
-      {/* Toggle header */}
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
@@ -39,7 +38,6 @@ function TextLocationFallback({ t }: { t: ReturnType<typeof useTranslations> }) 
         <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${expanded ? 'rotate-180' : ''}`} />
       </button>
 
-      {/* Expandable textarea */}
       {expanded && (
         <div className="px-4 pb-4 pt-2 bg-white space-y-2">
           <p className="text-slate-500 text-xs font-medium leading-relaxed">
@@ -65,14 +63,12 @@ function TextLocationFallback({ t }: { t: ReturnType<typeof useTranslations> }) 
 }
 
 export default function InfrastructureMap({ lat, lng, selectedInfraType, onFeatureSelect }: Props) {
-  // ── Hooks always at the top ─────────────────────────────────────
   const t            = useTranslations();
   const mapContainer = useRef<HTMLDivElement>(null);
   const map          = useRef<maplibregl.Map | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState('');
-
-  // ── Functions defined before useEffects ────────────────────────
+  const [selectedName, setSelectedName] = useState<string>('');
 
   function filterByInfraType(infraType: InfraType) {
     if (!map.current) return;
@@ -91,7 +87,7 @@ export default function InfrastructureMap({ lat, lng, selectedInfraType, onFeatu
       id:     'infra-selected',
       type:   'fill',
       source: 'infrastructure',
-      filter: ['==', ['id'], featureId],
+      filter: ['==', ['get', 'osm_id'], featureId],
       paint: {
         'fill-color':   '#e8620a',
         'fill-opacity': 0.8,
@@ -109,7 +105,7 @@ export default function InfrastructureMap({ lat, lng, selectedInfraType, onFeatu
 
       map.current.addSource('infrastructure', {
         type: 'geojson',
-        data: geojson as GeoJSON.FeatureCollection<GeoJSON.Geometry>,
+        data: geojson as unknown as GeoJSON.FeatureCollection,
       });
 
       map.current.addLayer({
@@ -130,19 +126,47 @@ export default function InfrastructureMap({ lat, lng, selectedInfraType, onFeatu
         paint: { 'line-color': ['get', 'color'], 'line-width': 3 },
       });
 
-      map.current.on('click', 'infra-fill', (e) => {
+      const processClick = (e: maplibregl.MapLayerMouseEvent) => {
         if (!e.features?.length) return;
         const f = e.features[0];
-        onFeatureSelect({ osm_id: f.properties?.osm_id ?? '', infra_type: f.properties?.infra_type ?? '', coordinates: [e.lngLat.lng, e.lngLat.lat] });
-        if (f.id !== undefined) highlightSelected(f.id);
-      });
+        const props = f.properties || {};
+        
+        const osmId = props.osm_id ?? '';
+        const infraType = props.infra_type ?? '';
+        
+        let readableName = '';
 
-      map.current.on('click', 'infra-line', (e) => {
-        if (!e.features?.length) return;
-        const f = e.features[0];
-        onFeatureSelect({ osm_id: f.properties?.osm_id ?? '', infra_type: f.properties?.infra_type ?? '', coordinates: [e.lngLat.lng, e.lngLat.lat] });
-        if (f.id !== undefined) highlightSelected(f.id);
-      });
+        if (props.name) {
+          readableName = props.name;
+        } else if (props.shop) {
+          readableName = `${props.shop.replace('_', ' ')} shop`;
+        } else if (props.amenity) {
+          readableName = props.amenity.replace('_', ' ');
+        } else if (props.building && props.building !== 'yes') {
+          readableName = `${props.building} building`;
+        } else if (props.highway) {
+          readableName = `${props.highway.replace('_', ' ')} road`;
+        } else if (props.waterway) {
+          readableName = `${props.waterway} waterway`;
+        } else {
+          readableName = `${infraType} Asset`;
+        }
+
+        readableName = readableName.charAt(0).toUpperCase() + readableName.slice(1);
+        setSelectedName(readableName);
+
+        onFeatureSelect({ 
+          osm_id: osmId, 
+          infra_type: infraType, 
+          coordinates: [e.lngLat.lng, e.lngLat.lat],
+          readable_name: readableName
+        });
+        
+        if (osmId) highlightSelected(osmId);
+      };
+
+      map.current.on('click', 'infra-fill', processClick);
+      map.current.on('click', 'infra-line', processClick);
 
       map.current.on('mouseenter', 'infra-fill', () => { if (map.current) map.current.getCanvas().style.cursor = 'pointer'; });
       map.current.on('mouseleave', 'infra-fill', () => { if (map.current) map.current.getCanvas().style.cursor = ''; });
@@ -157,8 +181,6 @@ export default function InfrastructureMap({ lat, lng, selectedInfraType, onFeatu
       setLoading(false);
     }
   }
-
-  // ── useEffects after all functions ────────────────────────────
 
   useEffect(() => {
     if (map.current || !mapContainer.current) return;
@@ -198,8 +220,6 @@ export default function InfrastructureMap({ lat, lng, selectedInfraType, onFeatu
     filterByInfraType(selectedInfraType);
   }, [selectedInfraType]);
 
-  // ── Render ────────────────────────────────────────────────────
-
   return (
     <div className="space-y-3">
       {loading && (
@@ -214,17 +234,23 @@ export default function InfrastructureMap({ lat, lng, selectedInfraType, onFeatu
           <p className="text-orange-600 text-xs font-semibold">{error}</p>
         </div>
       )}
-      {/* Map */}
+
       <div
         ref={mapContainer}
         className="w-full rounded-2xl border-2 border-slate-200 overflow-hidden"
         style={{ height: '350px' }}
       />
+
+      {selectedName && (
+        <div className="mx-1 p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs font-bold text-blue-900">
+          Selected Target Place: <span className="underline">{selectedName}</span>
+        </div>
+      )}
+
       <div className="flex items-center gap-1.5 px-1">
         <MapPin className="w-3 h-3 text-slate-400" />
         <p className="text-slate-400 text-xs font-medium">{t('report.mapTip')}</p>
       </div>
-      {/* Text description fallback */}
       <TextLocationFallback t={t} />
     </div>
   );

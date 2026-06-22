@@ -13,11 +13,41 @@ interface OverpassElement {
   type:      'node' | 'way' | 'relation';
   id:        number;
   geometry?: { lat: number; lon: number }[];
+  lat?:      number;
+  lon?:      number;
   tags?:     Record<string, string>;
 }
 
 interface OverpassResponse {
   elements: OverpassElement[];
+}
+
+export interface OSMGeoJSONFeature {
+  type: 'Feature';
+  id: string;
+  geometry: {
+    type: 'Point' | 'LineString' | 'Polygon';
+    coordinates: number[] | number[][] | number[][][];
+  };
+  properties: {
+    osm_id: string;
+    infra_type: InfraType;
+    color: string;
+    name?: string;
+    highway?: string;
+    waterway?: string;
+    power?: string;
+    bridge?: string;
+    building?: string;
+    shop?: string;
+    amenity?: string;
+    [key: string]: string | undefined;
+  };
+}
+
+export interface OSMFeatureCollection {
+  type: 'FeatureCollection';
+  features: OSMGeoJSONFeature[];
 }
 
 export async function fetchInfrastructure(lat: number, lng: number): Promise<OverpassResponse> {
@@ -50,21 +80,11 @@ export async function fetchInfrastructure(lat: number, lng: number): Promise<Ove
   return response.json();
 }
 
-export function osmToGeoJSON(osmData: OverpassResponse) {
-  const features: {
-    type: string;
-    id: string;
-    geometry: {
-      type: string;
-      coordinates: number[][] | number[][][];
-    };
-    properties: Record<string, string>;
-  }[] = [];
+export function osmToGeoJSON(osmData: OverpassResponse): OSMFeatureCollection {
+  const features: OSMGeoJSONFeature[] = [];
 
   osmData.elements.forEach((element: OverpassElement) => {
-    if (!element.geometry) return;
-
-    const tags      = element.tags ?? {};
+    const tags = element.tags ?? {};
     let infraType: InfraType = 'Other';
 
     if (tags.building)                                              infraType = 'Building';
@@ -73,14 +93,32 @@ export function osmToGeoJSON(osmData: OverpassResponse) {
     else if (tags.waterway || tags.natural === 'water')             infraType = 'Water';
     else if (tags.power)                                            infraType = 'Power';
 
-    if (element.type === 'way' && element.geometry) {
+    const baseProperties: OSMGeoJSONFeature['properties'] = {
+      osm_id:     `${element.type}/${element.id}`,
+      infra_type: infraType,
+      color:      infraColors[infraType],
+      ...tags
+    };
+
+    if (element.type === 'node' && element.lat !== undefined && element.lon !== undefined) {
+      features.push({
+        type: 'Feature',
+        id:   `${element.type}/${element.id}`,
+        geometry: {
+          type:        'Point',
+          coordinates: [element.lon, element.lat],
+        },
+        properties: baseProperties,
+      });
+    }
+    else if (element.geometry && element.geometry.length > 0) {
       const coordinates = element.geometry.map(
         (point: { lat: number; lon: number }) => [point.lon, point.lat]
       );
 
       const first = coordinates[0];
       const last  = coordinates[coordinates.length - 1];
-      const isPolygon = first[0] === last[0] && first[1] === last[1];
+      const isPolygon = first[0] === last[0] && first[1] === last[1] && coordinates.length >= 4;
 
       features.push({
         type: 'Feature',
@@ -89,12 +127,7 @@ export function osmToGeoJSON(osmData: OverpassResponse) {
           type:        isPolygon ? 'Polygon' : 'LineString',
           coordinates: isPolygon ? [coordinates] : coordinates,
         },
-        properties: {
-          osm_id:     `${element.type}/${element.id}`,
-          infra_type: infraType,
-          color:      infraColors[infraType],
-          ...tags,
-        },
+        properties: baseProperties,
       });
     }
   });

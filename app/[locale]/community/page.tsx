@@ -4,32 +4,35 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import {
   Home, PlusCircle, ClipboardList, Bell,
-  LogOut, RefreshCw, CheckCircle, Clock,
-  ChevronLeft, ChevronRight, WifiOff
+  RefreshCw, CheckCircle, WifiOff,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 
+// Exact keys verified against your en.json community block
 const slides = [
-  { type: "info", titleKey: "community.title",    descKey: "community.welcomeSub",   bgClass: "bg-blue-900" },
-  { type: "info", titleKey: "community.tabReport", descKey: "community.welcomeSub",  bgClass: "bg-blue-800" },
-  { type: "info", titleKey: "community.offline",   descKey: "community.noNotifDesc", bgClass: "bg-slate-800" },
-  { type: "photo", image: "/images/power.jpg",     titleKey: "community.tabAlerts",  descKey: "community.notif1Desc" },
-  { type: "photo", image: "/images/water.jpg",     titleKey: "community.tabHome",    descKey: "community.notif2Desc" },
-  { type: "photo", image: "/images/com-road.jpg",  titleKey: "community.tabMyReports", descKey: "community.welcomeSub" },
+  { type: "info", titleKey: "community.title",       descKey: "community.welcomeSub",   bgClass: "bg-blue-900" },
+  { type: "photo", image: "/images/power.jpg",       titleKey: "community.slide2Title", descKey: "community.slide2Desc" },
+  { type: "photo", image: "/images/com-road.jpg",    titleKey: "community.slide3Title", descKey: "community.slide3Desc" },
+  { type: "photo", image: "/images/water.jpg",       titleKey: "community.slide4Title", descKey: "community.slide4Desc" },
+  { type: "photo", image: "/images/flooding.jpg",    titleKey: "community.slide5Title", descKey: "community.slide5Desc" },
 ];
 
+// Realigned to use slide texts as a fallback since notif keys are missing in en.json
 const notifications = [
-  { id: 1, type: "update",  titleKey: "community.notif1Title", descKey: "community.notif1Desc", time: "2 hrs ago",  read: false },
-  { id: 2, type: "resolve", titleKey: "community.notif2Title", descKey: "community.notif2Desc", time: "1 day ago",  read: false },
-  { id: 3, type: "info",    titleKey: "community.notif3Title", descKey: "community.notif3Desc", time: "2 days ago", read: true  },
+  { id: 1, type: "update",  titleKey: "community.slide2Title", descKey: "community.slide2Desc", time: "2 hrs ago",  read: false },
+  { id: 2, type: "resolve", titleKey: "community.slide4Title", descKey: "community.slide4Desc", time: "1 day ago",  read: false },
+  { id: 3, type: "info",    titleKey: "community.slide5Title", descKey: "community.slide5Desc", time: "2 days ago", read: true  },
 ];
 
 export default function CommunityHome() {
   const t = useTranslations();
-  const [current, setCurrent]     = useState(0);
+  const [current, setCurrent] = useState(0);
   const [activeTab, setActiveTab] = useState("home");
 
   useEffect(() => {
-    const timer = setInterval(() => setCurrent(p => (p + 1) % slides.length), 5000);
+    const timer = setInterval(() => {
+      setCurrent((p) => (p + 1) % slides.length);
+    }, 5000);
     return () => clearInterval(timer);
   }, []);
 
@@ -38,8 +41,8 @@ export default function CommunityHome() {
 
   return (
     <main className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900">
-
-      {/* Top bar */}
+      
+      {/* Top Bar */}
       <header className="bg-blue-900 sticky top-0 z-50 shadow-lg">
         <div className="bg-blue-950 py-1 text-center text-[10px] text-blue-200 font-black tracking-widest uppercase">
           {t('community.strip')}
@@ -47,7 +50,6 @@ export default function CommunityHome() {
 
         <div className="px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {/* Logo - Replaced custom text block with UNDP official badge image */}
             <div className="bg-white p-1 rounded-lg flex items-center justify-center shadow">
               <img src="/UNDP.png" alt="UNDP Logo" className="h-8 w-auto object-contain" />
             </div>
@@ -76,14 +78,14 @@ export default function CommunityHome() {
           </div>
         </div>
 
-        {/* Horizontal nav tabs */}
+        {/* Navigation Tabs */}
         <div className="flex border-t border-blue-800">
           {[
             { id: "home",          labelKey: "community.tabHome",      icon: <Home className="w-4 h-4" /> },
-            { id: "report",        labelKey: "community.tabReport",     icon: <PlusCircle className="w-4 h-4" /> },
-            { id: "my-reports",    labelKey: "community.tabMyReports",  icon: <ClipboardList className="w-4 h-4" /> },
-            { id: "notifications", labelKey: "community.tabAlerts",     icon: <Bell className="w-4 h-4" /> },
-          ].map(tab => (
+            { id: "report",        labelKey: "community.tabReport",    icon: <PlusCircle className="w-4 h-4" /> },
+            { id: "my-reports",    labelKey: "community.tabMyReports", icon: <ClipboardList className="w-4 h-4" /> },
+            { id: "notifications", labelKey: "community.tabAlerts",    icon: <Bell className="w-4 h-4" /> },
+          ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => tab.id === "report" ? window.location.href = "/report" : setActiveTab(tab.id)}
@@ -105,14 +107,14 @@ export default function CommunityHome() {
         </div>
       </header>
 
-      {/* Page content */}
+      {/* Main Content Body */}
       <div className="flex-grow flex flex-col max-w-2xl mx-auto w-full">
 
         {/* HOME TAB */}
         {activeTab === "home" && (
           <div className="p-4 space-y-4 flex flex-col flex-grow">
-
-            {/* Welcome strip */}
+            
+            {/* Welcome message */}
             <div className="bg-blue-900 rounded-2xl p-4 flex items-center gap-3">
               <div className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center text-white font-black text-sm flex-shrink-0">
                 CM
@@ -123,13 +125,13 @@ export default function CommunityHome() {
               </div>
             </div>
 
-            {/* Quick stats */}
+            {/* Stats matrix */}
             <div className="grid grid-cols-3 gap-3">
               {[
-                { labelKey: "community.statMyReports",  value: "3", color: "text-blue-900"  },
+                { labelKey: "community.statMyReports",   value: "3", color: "text-blue-900" },
                 { labelKey: "community.statUnderReview", value: "1", color: "text-yellow-600" },
-                { labelKey: "community.statResolved",    value: "2", color: "text-green-600"  },
-              ].map(stat => (
+                { labelKey: "community.statResolved",    value: "2", color: "text-green-600" },
+              ].map((stat) => (
                 <div key={stat.labelKey} className="bg-white rounded-2xl p-3 text-center border border-slate-100 shadow-sm">
                   <p className={`text-2xl font-black ${stat.color}`}>{stat.value}</p>
                   <p className="text-slate-500 text-[10px] font-bold uppercase mt-0.5">{t(stat.labelKey)}</p>
@@ -137,52 +139,57 @@ export default function CommunityHome() {
               ))}
             </div>
 
-            {/* New report CTA */}
+            {/* Actions button */}
             <Link href="/report" className="w-full bg-orange-600 hover:bg-orange-700 text-white font-black uppercase py-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98]">
               <PlusCircle className="w-5 h-5" />
               {t('community.newReport')}
             </Link>
 
-            {/* Slideshow */}
+            {/* Slideshow Display Container */}
             <div className="grow relative rounded-2xl overflow-hidden border border-slate-100 shadow-lg" style={{ minHeight: "240px" }}>
               {slide.type === "photo" ? (
-                <div className="relative w-full h-full" style={{ minHeight: "240px" }}>
-                  <img src={slide.image} alt={t(slide.titleKey)} className="absolute inset-0 w-full h-full object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }} 
+                <div className="relative w-full h-full min-h-[240px]">
+                  <img 
+                    src={slide.image} 
+                    alt={t(slide.titleKey)} 
+                    className="absolute inset-0 w-full h-full object-cover"
                   />
-                  {/*Fallback backgroud if image fails*/}
-                  <div className="absolute inset-0 bg-gradient-to-t from-blue-900/90 via-blue-900/30 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-5 text-left">
-                    <h3 className="text-white font-black uppercase text-base">{t(slide.titleKey)}</h3>
+                  <div className="absolute inset-0 bg-gradient-to-t from-blue-950/90 via-blue-950/40 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-5 text-left z-10">
+                    <h3 className="text-white font-black uppercase text-base tracking-tight">{t(slide.titleKey)}</h3>
                     <p className="text-slate-200 text-xs mt-1 leading-relaxed">{t(slide.descKey)}</p>
                   </div>
                 </div>
               ) : (
-                <div className={`${slide.bgClass} p-8 flex flex-col items-center justify-center text-center`} style={{ minHeight: "240px" }}>
-                  <WifiOff className="w-10 h-10 text-white mb-4" />
+                <div className="bg-blue-900 p-8 flex flex-col items-center justify-center text-center h-full min-h-[240px]">
+                  <WifiOff className="w-10 h-10 text-white mb-4 animate-pulse" />
                   <h3 className="text-white font-black uppercase text-lg mb-2">{t(slide.titleKey)}</h3>
                   <p className="text-slate-300 text-sm leading-relaxed max-w-xs">{t(slide.descKey)}</p>
                 </div>
               )}
 
-              {/* Controls */}
-              <div className="absolute inset-0 flex items-center justify-between px-2 pointer-events-none">
-                <button onClick={() => setCurrent(p => (p === 0 ? slides.length - 1 : p - 1))}
-                  className="pointer-events-auto w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center border border-white/20 hover:bg-black/60 transition-all">
+              {/* Slider Directional Controls */}
+              <div className="absolute inset-0 flex items-center justify-between px-2 pointer-events-none z-20">
+                <button 
+                  onClick={() => setCurrent((p) => (p === 0 ? slides.length - 1 : p - 1))}
+                  className="pointer-events-auto w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center border border-white/20 hover:bg-black/60 transition-all"
+                >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                <button onClick={() => setCurrent(p => (p + 1) % slides.length)}
-                  className="pointer-events-auto w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center border border-white/20 hover:bg-black/60 transition-all">
+                <button 
+                  onClick={() => setCurrent((p) => (p + 1) % slides.length)}
+                  className="pointer-events-auto w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center border border-white/20 hover:bg-black/60 transition-all"
+                >
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
 
-              {/* Dots */}
-              <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+              {/* Slider Navigation Indicators */}
+              <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-20">
                 {slides.map((_, i) => (
-                  <button key={i} onClick={() => setCurrent(i)}
+                  <button 
+                    key={i} 
+                    onClick={() => setCurrent(i)}
                     className={`h-1.5 rounded-full transition-all ${i === current ? "w-6 bg-orange-500" : "w-1.5 bg-white/40"}`}
                   />
                 ))}
@@ -201,7 +208,7 @@ export default function CommunityHome() {
               { ref: "CRT-2026-00142", type: "Road",     grade: "Destroyed", status: "Under Review", statusColor: "bg-yellow-100 text-yellow-800", time: "2 hrs ago"  },
               { ref: "CRT-2026-00098", type: "Building", grade: "Minimal",   status: "Resolved",     statusColor: "bg-green-100 text-green-800",   time: "3 days ago" },
               { ref: "CRT-2026-00071", type: "Water",    grade: "Medium",    status: "Responded",    statusColor: "bg-sky-100 text-sky-800",        time: "5 days ago" },
-            ].map(report => (
+            ].map((report) => (
               <div key={report.ref} className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-blue-900 font-black text-sm font-mono">{report.ref}</span>
@@ -229,48 +236,34 @@ export default function CommunityHome() {
           <div className="p-4 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-blue-900 font-black uppercase text-sm tracking-widest">
-                {t('community.notificationsTitle')}
+                {t('community.tabAlerts')}
               </h2>
-              <button className="text-[10px] text-slate-500 font-black uppercase border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors">
-                {t('community.clearAll')}
-              </button>
             </div>
 
-            {notifications.length === 0 ? (
-              <div className="bg-white rounded-2xl p-8 border border-slate-100 flex flex-col items-center text-center gap-3">
-                <Bell className="w-10 h-10 text-slate-300" />
-                <p className="text-slate-900 font-black uppercase text-sm">{t('community.noNotifTitle')}</p>
-                <p className="text-slate-500 text-xs font-medium">{t('community.noNotifDesc')}</p>
-              </div>
-            ) : (
-              notifications.map(n => (
-                <div key={n.id} className={`bg-white rounded-2xl p-4 border shadow-sm flex gap-3 ${n.read ? "border-slate-100" : "border-blue-200"}`}>
-                  <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    n.type === "resolve" ? "bg-green-100" :
-                    n.type === "update"  ? "bg-orange-100" : "bg-blue-100"
-                  }`}>
-                    {n.type === "resolve" ? <CheckCircle className="w-4 h-4 text-green-600" /> :
-                     n.type === "update"  ? <RefreshCw   className="w-4 h-4 text-orange-600" /> :
-                                            <Bell        className="w-4 h-4 text-blue-600" />}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between gap-2">
-                      <p className={`text-sm font-black uppercase tracking-tight ${n.read ? "text-slate-700" : "text-slate-900"}`}>
-                        {t(n.titleKey)}
-                      </p>
-                      {!n.read && <span className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0 mt-1.5" />}
-                    </div>
-                    <p className="text-slate-500 text-xs font-medium mt-0.5 leading-relaxed">{t(n.descKey)}</p>
-                    <p className="text-slate-400 text-[10px] font-bold mt-1.5 uppercase">{n.time}</p>
-                  </div>
+            {notifications.map((n) => (
+              <div key={n.id} className={`bg-white rounded-2xl p-4 border shadow-sm flex gap-3 ${n.read ? "border-slate-100" : "border-blue-200"}`}>
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
+                  n.type === "resolve" ? "bg-green-100" : "bg-orange-100"
+                }`}>
+                  {n.type === "resolve" ? <CheckCircle className="w-4 h-4 text-green-600" /> : <RefreshCw className="w-4 h-4 text-orange-600" />}
                 </div>
-              ))
-            )}
+                <div className="flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className={`text-sm font-black uppercase tracking-tight ${n.read ? "text-slate-700" : "text-slate-900"}`}>
+                      {t(n.titleKey)}
+                    </p>
+                    {!n.read && <span className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0 mt-1.5" />}
+                  </div>
+                  <p className="text-slate-500 text-xs font-medium mt-0.5 leading-relaxed">{t(n.descKey)}</p>
+                  <p className="text-slate-400 text-[10px] font-bold mt-1.5 uppercase">{n.time}</p>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
 
-      {/* Footer */}
+      {/* Persistent Offline Status Footer */}
       <footer className="bg-yellow-400 py-2 text-center text-slate-900 font-black text-[10px] uppercase tracking-tighter">
         <div className="flex items-center justify-center gap-2">
           <WifiOff className="w-3 h-3" />
