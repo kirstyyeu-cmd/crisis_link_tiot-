@@ -47,8 +47,14 @@ function generateRef() {
 }
 
 // ── Success Modal ──────────────────────────────────────────────────────────
-function SuccessModal({ refNumber, infraType, damageGrade, photoCount, onClose }: {
-  refNumber: string; infraType: string; damageGrade: string; photoCount: number; onClose: () => void;
+function SuccessModal({ refNumber, infraType, assetName, coordinates, damageGrade, photos, onClose }: {
+  refNumber: string; 
+  infraType: string; 
+  assetName: string;
+  coordinates: string;
+  damageGrade: string; 
+  photos: string[];
+  onClose: () => void;
 }) {
   const t = useTranslations();
   const grade = damageOptions.find(d => d.level === damageGrade);
@@ -87,14 +93,21 @@ function SuccessModal({ refNumber, infraType, damageGrade, photoCount, onClose }
               {t('success.saveRef')}
             </p>
             <hr className="border-slate-100 mb-3" />
-            <div className="space-y-2.5">
+            
+            <div className="space-y-2.5 mb-5">
               <div className="flex items-center justify-between">
                 <span className="text-slate-500 text-sm font-semibold">{t('success.infrastructure')}</span>
                 <span className="text-slate-800 text-sm font-bold">{infraType}</span>
               </div>
+              {assetName && (
+                <div className="flex items-start justify-between gap-4">
+                  <span className="text-slate-500 text-sm font-semibold">Target Asset</span>
+                  <span className="text-slate-800 text-sm font-bold text-right underline decoration-orange-500 decoration-2">{assetName}</span>
+                </div>
+              )}
               <div className="flex items-center justify-between">
-                <span className="text-slate-500 text-sm font-semibold">{t('success.photosAttached')}</span>
-                <span className="text-slate-800 text-sm font-bold">{photoCount}</span>
+                <span className="text-slate-500 text-sm font-semibold">Coordinates</span>
+                <span className="text-slate-800 text-sm font-mono text-xs bg-slate-100 px-2 py-0.5 rounded border border-slate-200">{coordinates}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-slate-500 text-sm font-semibold">{t('success.damageGrade')}</span>
@@ -109,6 +122,34 @@ function SuccessModal({ refNumber, infraType, damageGrade, photoCount, onClose }
                 </span>
               </div>
             </div>
+
+            {/* Photo Evidence Stamped Grid */}
+            {photos.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  Stamped Photo Evidence
+                </p>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {photos.map((src, idx) => (
+                    <div key={idx} className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-sm border border-slate-200 bg-slate-50">
+                      <img src={src} alt="" className="w-full h-full object-cover" />
+                      {/* Location Overlay Stamp */}
+                      <div className="absolute bottom-1.5 left-1.5 right-1.5 bg-black/60 backdrop-blur-[2px] p-1.5 rounded-lg text-white flex items-center gap-1">
+                        <MapPin className="w-3 h-3 text-orange-400 flex-shrink-0" />
+                        <div className="min-w-0 flex-1 leading-none">
+                          <p className="text-[9px] font-black tracking-tight truncate uppercase">
+                            {assetName || `${infraType} Asset`}
+                          </p>
+                          <p className="text-[8px] font-mono text-slate-300 tracking-tighter truncate mt-0.5">
+                            {coordinates}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Timeline */}
@@ -174,6 +215,7 @@ export default function ReportPage() {
   const [aiDone, setAiDone]               = useState(false);
   const [photos, setPhotos]               = useState<string[]>([]);
   const [location, setLocation]           = useState("");
+  const [selectedAssetName, setSelectedAssetName] = useState("");
   const [gpsLoading, setGpsLoading]       = useState(false);
   const [submitting, setSubmitting]       = useState(false);
   const [showSuccess, setShowSuccess]     = useState(false);
@@ -247,7 +289,6 @@ export default function ReportPage() {
       return;
     }
 
-    // TODO: replace with real API call
     await new Promise(r => setTimeout(r, 1400));
     setRefNumber(generateRef());
     setSubmitting(false);
@@ -256,6 +297,7 @@ export default function ReportPage() {
 
   function resetForm() {
     setLocation(""); setSelectedInfra("Road"); setDamageGrade("");
+    setSelectedAssetName("");
     setPhotos([]); setAiDone(false); setAiLoading(false);
     setShowSuccess(false); setRefNumber(""); setOfflineQueue(false);
     if (navigator.geolocation) {
@@ -335,7 +377,15 @@ export default function ReportPage() {
                 lat={parseFloat(location.split(',')[0]) || 0}
                 lng={parseFloat(location.split(',')[1]) || 0}
                 selectedInfraType={selectedInfra as InfraType}
-                onFeatureSelect={(feature) => {
+                onFeatureSelect={(feature: {
+                  osm_id: string;
+                  infra_type: string;
+                  coordinates: [number, number];
+                  readable_name?: string;
+                }) => {
+                  if (feature.readable_name) {
+                    setSelectedAssetName(feature.readable_name);
+                  }
                   console.log('Selected feature:', feature);
                 }}
               />
@@ -511,8 +561,10 @@ export default function ReportPage() {
         <SuccessModal
           refNumber={refNumber}
           infraType={selectedInfra}
+          assetName={selectedAssetName}
+          coordinates={location}
           damageGrade={damageGrade}
-          photoCount={photos.length}
+          photos={photos}
           onClose={resetForm}
         />
       )}
