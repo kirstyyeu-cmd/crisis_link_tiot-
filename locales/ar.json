@@ -1,0 +1,189 @@
+{
+  "home": {
+    "title": "مرحبًا بكم في Crisis Link",
+    "subtitle": "استخدم الرابط أدناه لفتح صفحة إنشاء الحساب الخاصة ببرنامج UNDP.",
+    "createAccountButton": "الانتقال إلى إنشاء الحساب"
+  },
+  "createAccount": {
+    "brand": "UNDP",
+    "title": "إنشاء حسابك",
+    "subtitle": "انضم إلى مجتمع UNDP من خلال حساب آمن. لا توجد صور، بل وصول نظيف فقط.",
+    "fields": {
+      "name": "الاسم الكامل",
+      "namePlaceholder": "أدخل اسمك الكامل",
+      "email": "عنوان البريد الإلكتروني",
+      "emailPlaceholder": "you@example.com",
+      "password": "كلمة المرور",
+      "passwordPlaceholder": "أنشئ كلمة مرور",
+      "confirmPassword": "تأكيد كلمة المرور",
+      "confirmPasswordPlaceholder": "كرر كلمة المرور",
+      "organization": "المنظمة",
+      "organizationPlaceholder": "منظمتك",
+      "country": "الدولة",
+      "countryPlaceholder": "الدولة أو المنطقة"
+    },
+    "actions": {
+      "createAccount": "إنشاء الحساب"
+    },
+    "footer": {
+      "haveAccount": "هل لديك حساب بالفعل؟",
+      "login": "تسجيل الدخول"
+    }
+  },
+  "community": {
+    "portalTitle": "بوابة المجتمع",
+    "portalTagline": "مُبلغ تأثيرات الأزمة",
+    "menu": {
+      "reportIncident": "الإبلاغ عن حادث",
+      "reportIncidentSubtitle": "أرسل تقريرًا جديدًا عن الضرر",
+      "myReports": "تقاريري",
+      "myReportsSubtitle": "عرض تقاريرك السابقة",
+      "trackReport": "متابعة التقرير",
+      "trackReportSubtitle": "تحقق من حالة المشكلة"
+    },
+    "offlineBanner": {
+      "message": "⚠️ أنت غير متصل — تم حفظ التقرير محليًا",
+      "pendingSync": "2 في الانتظار"
+    }
+  },
+  "login": {
+    "title": "أداة الإبلاغ عن الأزمات",
+    "subtitle": "بوابة الشركاء في UNDP",
+    "fields": {
+      "username": "اسم المستخدم",
+      "usernamePlaceholder": "أدخل اسم المستخدم",
+      "password": "كلمة المرور",
+      "passwordPlaceholder": "••••••••"
+    },
+    "actions": {
+      "signIn": "تسجيل الدخول",
+      "createAccount": "إنشاء حساب"
+    },
+    "links": {
+      "forgotPassword": "هل نسيت كلمة المرور؟ انقر هنا"
+    },
+    "label": "مستخدم جديد؟"
+  },
+  "track": {
+    "label": "متابعة التقرير",
+    "title": "أين تقريرك؟",
+    "subtitle": "أدخل رقم المرجع الخاص بك لمعرفة أحدث الحالة والأدلة الفوتوغرافية.",
+    "inputPlaceholder": "أدخل رقم المرجع",
+    "button": "متابعة",
+    "links": {
+      "submitNewReport": "إرسال تقرير جديد",
+      "viewPastReports": "عرض التقارير السابقة"
+    },
+    "report": {
+      "reference": "المرجع",
+      "status": "الحالة",
+      "date": "التاريخ",
+      "location": "الموقع",
+      "resolved": "تم الحل",
+      "yes": "نعم",
+      "no": "لا",
+      "note": "يتم مراجعة تقريرك من قبل فريق الاستجابة وسيتم تحديثه قريبًا.",
+      "imageAlt": "صورة التقرير المتابعة {{index}}",
+      "statusFlow": {
+        "submitted": "تم الإرسال",
+        "underReview": "قيد المراجعة",
+        "responded": "تم الرد",
+        "resolved": "تم الحل"
+      }
+    }
+  },
+  "myReports": {
+    "title": "تقاريري",
+    "subtitle": "راجع التقارير السابقة، وتحقق من الحالة، وافحص أدلة الصور لكل تقرير.",
+    "actions": {
+      "newReport": "تقرير جديد",
+      "trackReport": "متابعة التقرير"
+    },
+    "fields": {
+      "reference": "المرجع",
+      "date": "التاريخ",
+      "location": "الموقع",
+      "status": "الحالة",
+      "resolved": "تم الحل",
+      "ongoing": "قيد التنفيذ"
+    }
+  },
+  "report": {
+    "header": {
+      "title": "الإبلاغ عن حادث",
+      "subtitle": "مُبلغ تأثيرات الأزمة"
+    },
+    "section": {
+      "location": "الموقع",
+      "infrastructure": "نوع البنية التحتية",
+      "photos": "أدلة الصور",
+      "damageGrade": "درجة الضرر",
+      "status": "الحالة"
+    },
+    "placeholders": {
+      "location": "ابحث عن عنوان أو علامة مميزة…"
+    },
+    "locationCaptured": "تم التقاط الموقع",
+    "description": {
+      "photos": "ارفع ما يصل إلى 4 صور. سيقوم الذكاء الاصطناعي بتحليلها تلقائيًا واقتراح درجة الضرر.",
+      "ai": "يقوم الذكاء الاصطناعي بتحليل الصور التي ترفعها واقتراح درجة الضرر تلقائيًا. يمكنك تجاوزها إذا لزم الأمر.",
+      "uploadPrompt": "قم بتحميل صورة أعلاه لتمكين تصنيف الذكاء الاصطناعي"
+    },
+    "actions": {
+      "takePhoto": "التقاط صورة",
+      "upload": "رفع",
+      "aiPick": "اختيار الذكاء الاصطناعي",
+      "submitReport": "إرسال التقرير",
+      "submitting": "جارٍ الإرسال…",
+      "submitAnother": "إرسال تقرير آخر",
+      "goHome": "العودة إلى الصفحة الرئيسية"
+    },
+    "alerts": {
+      "addLocation": "يرجى إضافة موقع.",
+      "selectInfrastructure": "يرجى اختيار نوع البنية التحتية.",
+      "uploadPhoto": "يرجى رفع صورة واحدة على الأقل.",
+      "geolocationUnsupported": "الموقع الجغرافي غير مدعوم.",
+      "geolocationFailed": "تعذر الحصول على الموقع. يرجى كتابته يدويًا."
+    },
+    "status": {
+      "submitted": "تم الإرسال",
+      "underReview": "قيد المراجعة",
+      "responded": "تم الرد",
+      "resolved": "تم الحل",
+      "progressInfo": "تقدم التقرير",
+      "submittedInfo": "الآن — تم استلام التقرير",
+      "underReviewInfo": "جارٍ تعيين موظف استجابة",
+      "respondedInfo": "تم اتخاذ إجراء على الأرض",
+      "resolvedInfo": "تم حل المشكلة بالكامل",
+      "analysingPhotos": "جارٍ تحليل الصور…"
+    },
+    "success": {
+      "title": "تم إرسال التقرير!",
+      "subtitle": "تم استلام تقريرك وهو قيد المراجعة.",
+      "saveReference": "احفظ رقم المرجع هذا لتتبع تقريرك",
+      "photosAttached": "الصور المرفقة",
+      "reEscalation": "إذا لم يتم استلام أي رد خلال 48 ساعة، فسيتم إعادة تصعيد التقرير تلقائيًا."
+    },
+    "photoFooter": "{{count}}/4 صور • JPG أو PNG • أقصى 10 ميغابايت لكل صورة"
+  },
+  "damageGrades": {
+    "minimal": "ضئيل",
+    "partial": "جزئي",
+    "destroyed": "مدمر بالكامل",
+    "minimalDescription": "أضرار طفيفة، لا تزال قابلة للاستخدام",
+    "partialDescription": "أضرار كبيرة، استخدام محدود",
+    "destroyedDescription": "خسارة كاملة، غير قابل للاستخدام"
+  },
+  "infrastructureTypes": {
+    "road": "طريق",
+    "building": "مبنى",
+    "bridge": "جسر",
+    "water": "ماء",
+    "power": "طاقة",
+    "other": "أخرى"
+  },
+  "misc": {
+    "gps": "GPS",
+    "aiGenerated": "مولّد بالذكاء الاصطناعي"
+  }
+}

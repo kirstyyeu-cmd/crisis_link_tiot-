@@ -1,0 +1,189 @@
+{
+  "home": {
+    "title": "欢迎来到 Crisis Link",
+    "subtitle": "使用下面的链接打开 UNDP 创建账户页面。",
+    "createAccountButton": "前往创建账户"
+  },
+  "createAccount": {
+    "brand": "UNDP",
+    "title": "创建您的账户",
+    "subtitle": "加入 UNDP 社区，使用安全账户。无需图片，仅需简洁访问。",
+    "fields": {
+      "name": "全名",
+      "namePlaceholder": "请输入您的全名",
+      "email": "电子邮件地址",
+      "emailPlaceholder": "you@example.com",
+      "password": "密码",
+      "passwordPlaceholder": "创建密码",
+      "confirmPassword": "确认密码",
+      "confirmPasswordPlaceholder": "重复输入密码",
+      "organization": "组织",
+      "organizationPlaceholder": "您的组织",
+      "country": "国家",
+      "countryPlaceholder": "国家或地区"
+    },
+    "actions": {
+      "createAccount": "创建账户"
+    },
+    "footer": {
+      "haveAccount": "已经有账户了？",
+      "login": "登录"
+    }
+  },
+  "community": {
+    "portalTitle": "社区门户",
+    "portalTagline": "危机影响上报员",
+    "menu": {
+      "reportIncident": "报告事件",
+      "reportIncidentSubtitle": "提交新的损坏报告",
+      "myReports": "我的报告",
+      "myReportsSubtitle": "查看您之前的提交内容",
+      "trackReport": "追踪报告",
+      "trackReportSubtitle": "查看问题状态"
+    },
+    "offlineBanner": {
+      "message": "⚠️ 您当前离线 — 报告已本地保存",
+      "pendingSync": "2 条待同步"
+    }
+  },
+  "login": {
+    "title": "危机上报工具",
+    "subtitle": "UNDP 合作伙伴门户",
+    "fields": {
+      "username": "用户名",
+      "usernamePlaceholder": "输入用户名",
+      "password": "密码",
+      "passwordPlaceholder": "••••••••"
+    },
+    "actions": {
+      "signIn": "登录",
+      "createAccount": "创建账户"
+    },
+    "links": {
+      "forgotPassword": "忘记密码？点击这里"
+    },
+    "label": "新用户？"
+  },
+  "track": {
+    "label": "追踪报告",
+    "title": "您的报告在哪里？",
+    "subtitle": "输入您的报告编号，查看最新状态和照片证据。",
+    "inputPlaceholder": "输入参考编号",
+    "button": "追踪",
+    "links": {
+      "submitNewReport": "提交新报告",
+      "viewPastReports": "查看往期报告"
+    },
+    "report": {
+      "reference": "编号",
+      "status": "状态",
+      "date": "日期",
+      "location": "位置",
+      "resolved": "已解决",
+      "yes": "是",
+      "no": "否",
+      "note": "您的报告正由响应团队审阅，很快将更新进度。",
+      "imageAlt": "已追踪报告照片 {{index}}",
+      "statusFlow": {
+        "submitted": "已提交",
+        "underReview": "审核中",
+        "responded": "已响应",
+        "resolved": "已解决"
+      }
+    }
+  },
+  "myReports": {
+    "title": "我的报告",
+    "subtitle": "查看历史提交内容，检查状态并查看每份报告的照片证据。",
+    "actions": {
+      "newReport": "新建报告",
+      "trackReport": "追踪报告"
+    },
+    "fields": {
+      "reference": "编号",
+      "date": "日期",
+      "location": "位置",
+      "status": "状态",
+      "resolved": "已解决",
+      "ongoing": "进行中"
+    }
+  },
+  "report": {
+    "header": {
+      "title": "报告事件",
+      "subtitle": "危机影响上报员"
+    },
+    "section": {
+      "location": "位置",
+      "infrastructure": "基础设施类型",
+      "photos": "照片证据",
+      "damageGrade": "损坏等级",
+      "status": "状态"
+    },
+    "placeholders": {
+      "location": "搜索地址或地标…"
+    },
+    "locationCaptured": "已捕获位置",
+    "description": {
+      "photos": "最多上传 4 张照片。我们的 AI 将自动分析并建议损坏等级。",
+      "ai": "我们的 AI 会分析您上传的照片并自动建议损坏等级。必要时您也可以覆盖建议。",
+      "uploadPrompt": "上传上方照片以启用 AI 分类"
+    },
+    "actions": {
+      "takePhoto": "拍照",
+      "upload": "上传",
+      "aiPick": "AI 选择",
+      "submitReport": "提交报告",
+      "submitting": "提交中…",
+      "submitAnother": "提交另一份报告",
+      "goHome": "返回主页"
+    },
+    "alerts": {
+      "addLocation": "请添加位置。",
+      "selectInfrastructure": "请选择基础设施类型。",
+      "uploadPhoto": "请至少上传一张照片。",
+      "geolocationUnsupported": "不支持地理定位。",
+      "geolocationFailed": "无法获取位置。请手动输入。"
+    },
+    "status": {
+      "submitted": "已提交",
+      "underReview": "审核中",
+      "responded": "已响应",
+      "resolved": "已解决",
+      "progressInfo": "报告进度",
+      "submittedInfo": "刚刚 — 已收到报告",
+      "underReviewInfo": "正在分配响应人员",
+      "respondedInfo": "现场已采取行动",
+      "resolvedInfo": "问题已彻底解决",
+      "analysingPhotos": "分析照片中…"
+    },
+    "success": {
+      "title": "报告已提交！",
+      "subtitle": "您的报告已收到，正在审核中。",
+      "saveReference": "保存此参考编号以追踪报告",
+      "photosAttached": "已附照片",
+      "reEscalation": "如果 48 小时内未收到回复，报告将自动重新升级。"
+    },
+    "photoFooter": "{{count}}/4 张照片 • JPG 或 PNG • 每张最多 10 MB"
+  },
+  "damageGrades": {
+    "minimal": "轻微",
+    "partial": "部分损坏",
+    "destroyed": "完全毁坏",
+    "minimalDescription": "轻微损坏，仍可正常使用",
+    "partialDescription": "严重损坏，使用受限",
+    "destroyedDescription": "彻底损失，无法使用"
+  },
+  "infrastructureTypes": {
+    "road": "道路",
+    "building": "建筑",
+    "bridge": "桥梁",
+    "water": "水务",
+    "power": "电力",
+    "other": "其他"
+  },
+  "misc": {
+    "gps": "GPS",
+    "aiGenerated": "AI 生成"
+  }
+}
