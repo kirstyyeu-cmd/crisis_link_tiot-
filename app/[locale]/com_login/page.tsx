@@ -1,10 +1,79 @@
 "use client";
-import React from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { MapPin } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { supabase } from '@/lib/supabaseClient';
+import PasswordInput from '@/components/Passwordinput';
+
 export default function CommunityLoginPage() {
-  const t = useTranslations();
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
+
+  // Already signed in (for example the user closed the app and came back)? Go straight in.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+        if (profile?.role === 'reporter') {
+          router.replace('/community');
+          return;
+        }
+      }
+      if (!cancelled) setChecking(false);
+    })();
+    return () => { cancelled = true; };
+  }, [router]);
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+      if (signInError || !data.user) {
+        setError(
+          signInError?.message.toLowerCase().includes('not confirmed')
+            ? 'Please confirm your email first. Check your inbox.'
+            : 'Invalid email or password.'
+        );
+        return;
+      }
+
+      // This portal is for community members only
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single();
+      if (profile?.role !== 'reporter') {
+        await supabase.auth.signOut();
+        setError('This portal is for community members. Please use the login for your account type.');
+        return;
+      }
+
+      router.push('/community');
+    } catch {
+      setError('An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (checking) return <main className="min-h-screen bg-blue-900" />;
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-blue-900 p-4 font-sans">
@@ -15,57 +84,69 @@ export default function CommunityLoginPage() {
           <div className="mb-4 w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
             <MapPin className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-lg font-black uppercase tracking-wider">
-            {t('comLogin.title')}
-          </h1>
+          <h1 className="text-lg font-black uppercase tracking-wider">Crisis Link</h1>
           <p className="text-blue-300 text-xs font-bold uppercase tracking-widest mt-1">
-            {t('comLogin.subtitle')}
+            Login
           </p>
         </div>
 
         {/* Form */}
-        <form className="p-8 space-y-5">
+        <form onSubmit={handleSubmit} className="p-8 space-y-5">
           <div className="flex flex-col gap-2">
-            <label className="text-blue-900 text-xs font-black uppercase tracking-wide">
-              {t('comLogin.usernameLabel')}
+            <label htmlFor="email" className="text-blue-900 text-xs font-black uppercase tracking-wide">
+              Email address
             </label>
             <input
-              type="text"
-              placeholder={t('comLogin.usernamePlaceholder')}
+              id="email"
+              type="email"
+              required
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
               className="w-full p-3 bg-slate-50 border-2 border-slate-200 rounded-xl outline-none text-slate-900 placeholder:text-slate-300 font-semibold focus:border-blue-900 transition-all"
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-blue-900 text-xs font-black uppercase tracking-wide">
-              {t('comLogin.passwordLabel')}
+            <label htmlFor="password" className="text-blue-900 text-xs font-black uppercase tracking-wide">
+              Password
             </label>
-            <input
-              type="password"
-              placeholder={t('comLogin.passwordPlaceholder')}
-              className="w-full p-3 bg-slate-50 border-2 border-slate-200 rounded-xl outline-none text-slate-900 font-semibold focus:border-blue-900 transition-all"
+            <PasswordInput
+              id="password"
+              required
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full p-3 bg-slate-50 border-2 border-slate-200 rounded-xl outline-none text-slate-900 placeholder:text-slate-300 font-semibold focus:border-blue-900 transition-all"
             />
           </div>
 
-          <Link href="/community">
-            <button
-              type="button"
-              className="w-full bg-orange-600 hover:bg-orange-700 text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-wide transition-all active:scale-[0.98] text-sm mt-2"
-            >
-              {t('comLogin.signIn')}
-            </button>
-          </Link>
+          {error && (
+            <p role="alert" className="text-red-600 text-xs font-bold text-center">
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-orange-600 hover:bg-orange-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-wide transition-all active:scale-[0.98] text-sm mt-2"
+          >
+            {loading ? 'Signing in...' : 'Sign in to portal'}
+          </button>
 
           <div className="text-center">
-            <a href="#" className="text-blue-700 hover:underline text-xs font-bold">
-              {t('comLogin.forgotPassword')}
-            </a>
+            <Link href="/forgot_password" className="text-blue-700 hover:underline text-xs font-bold">
+              Forgot password? Click here
+            </Link>
           </div>
 
           <div className="relative flex py-2 items-center">
             <div className="flex-grow border-t border-slate-100" />
             <span className="flex-shrink mx-4 text-slate-400 text-[10px] uppercase font-black tracking-widest">
-              {t('comLogin.newUser')}
+              New to platform?
             </span>
             <div className="flex-grow border-t border-slate-100" />
           </div>
@@ -74,7 +155,7 @@ export default function CommunityLoginPage() {
             href="/create_account"
             className="block w-full py-3.5 bg-white border-2 border-blue-900 text-blue-900 font-black uppercase text-xs rounded-xl hover:bg-slate-50 transition-all text-center"
           >
-            {t('comLogin.createAccount')}
+            Create account
           </Link>
         </form>
       </div>

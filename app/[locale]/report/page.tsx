@@ -1,4 +1,5 @@
 "use client";
+import {supabase} from '@/lib/supabaseClient';
 import { InfraType } from '@/lib/overpass';
 import dynamic from 'next/dynamic';
 import React, { useState, useRef, useEffect } from 'react';
@@ -34,13 +35,19 @@ const infraTypes = [
   { name: "Water",    icon: <Droplets      className="w-6 h-6" /> },
   { name: "Power",    icon: <Zap           className="w-6 h-6" /> },
   { name: "Other",    icon: <MoreHorizontal className="w-6 h-6" /> },
-];
+]
 
 const damageOptions = [
   { level: "Minimal",   descKey: "report.damageMinimalDesc",  dot: "bg-green-500",  border: "border-green-400",  badge: "bg-green-100 text-green-800"  },
   { level: "Medium",    descKey: "report.damageMediumDesc",   dot: "bg-yellow-400", border: "border-yellow-400", badge: "bg-yellow-100 text-yellow-800" },
   { level: "Destroyed", descKey: "report.damageDestroyedDesc",dot: "bg-red-600",    border: "border-red-400",    badge: "bg-red-100 text-red-800"       },
 ];
+
+const damageGradeToDb: Record<string, string> = {
+  Minimal: "minimal",
+  Medium: "partial",
+  Destroyed: "destroyed",
+};
 
 function generateRef() {
   return "CRT-" + new Date().getFullYear() + "-" + String(Math.floor(Math.random() * 90000) + 10000);
@@ -214,6 +221,7 @@ export default function ReportPage() {
   const [aiLoading, setAiLoading]         = useState(false);
   const [aiDone, setAiDone]               = useState(false);
   const [photos, setPhotos]               = useState<string[]>([]);
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [location, setLocation]           = useState("");
   const [selectedAssetName, setSelectedAssetName] = useState("");
   const [gpsLoading, setGpsLoading]       = useState(false);
@@ -253,10 +261,12 @@ export default function ReportPage() {
 
   function handlePhotos(files: FileList | null) {
     if (!files) return;
-    const urls = Array.from(files).slice(0, 4 - photos.length).map(f => URL.createObjectURL(f));
-    const updated = [...photos, ...urls].slice(0, 4);
-    setPhotos(updated);
-    if (updated.length >= 1 && !aiDone) {
+    const newFiles = Array.from(files).slice(0, 4 - photos.length);
+    const urls = newFiles.map(f => URL.createObjectURL(f));
+    setPhotos([...photos, ...urls].slice(0, 4));
+    setPhotoFiles([...photoFiles, ...newFiles].slice(0, 4));
+
+    if (photos.length + newFiles.length >= 1 && !aiDone) {
       setAiLoading(true);
       setDamageGrade("");
       setTimeout(() => {
@@ -269,9 +279,10 @@ export default function ReportPage() {
   }
 
   function removePhoto(idx: number) {
-    const updated = photos.filter((_, i) => i !== idx);
-    setPhotos(updated);
-    if (updated.length === 0) { setDamageGrade(""); setAiDone(false); }
+    setPhotos(photos.filter((_, i) => i !== idx));
+    setPhotoFiles(photoFiles.filter((_, i) => i !== idx));
+    if (photos.length === 1) { setDamageGrade(""); setAiDone(false); }
+
   }
 
   async function handleSubmit() {
@@ -288,10 +299,47 @@ export default function ReportPage() {
       setSubmitting(false);
       return;
     }
+    const [latStr, lngStr] = location.split(',').map(s => s.trim());
+    const latitude = parseFloat(latStr);
+    const longitude = parseFloat(lngStr)
+    
+    const photoUrls: string[] = [];
+    for (const file of photoFiles) {
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('report-photos')
+        .upload(fileName, file);
 
-    await new Promise(r => setTimeout(r, 1400));
-    setRefNumber(generateRef());
+      if (uploadError) {
+        console.error('Photo upload failed:', uploadError);
+        continue; // skip this photo, keep trying the rest
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('report-photos')
+        .getPublicUrl(fileName);
+
+      photoUrls.push(urlData.publicUrl);
+    }
+
+    const { data, error } = await supabase
+    .from('reports')
+    .insert({
+      latitude,
+      longitude,
+      infrastructure_type: selectedInfra,
+      damage_classification: damageGradeToDb[damageGrade] || null,
+    })
+    .select()
+    .single();
+
     setSubmitting(false);
+    if (error){
+      console.error('Report submission failed:', error);
+      alert(t('report.alertLocation')); // temporary — swap for a real error message string
+      return;
+    }
+    setRefNumber(data.id);
     setShowSuccess(true);
   }
 

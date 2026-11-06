@@ -1,261 +1,418 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useSyncExternalStore } from 'react';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import {
-  Home, PlusCircle, ClipboardList, Bell,
-  RefreshCw, CheckCircle, WifiOff,
-  ChevronLeft, ChevronRight
+  Home, PlusCircle, ClipboardList, Bell, RefreshCw, CheckCircle, WifiOff, LogOut,
+  Route, Building2, Droplets, Zap, Landmark, MapPin, Camera, Search, Truck,
 } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
 
-// Exact keys verified against your en.json community block
-const slides = [
-  { type: "info", titleKey: "community.title",       descKey: "community.welcomeSub",   bgClass: "bg-blue-900" },
-  { type: "photo", image: "/images/power.jpg",       titleKey: "community.slide2Title", descKey: "community.slide2Desc" },
-  { type: "photo", image: "/images/com-road.jpg",    titleKey: "community.slide3Title", descKey: "community.slide3Desc" },
-  { type: "photo", image: "/images/water.jpg",       titleKey: "community.slide4Title", descKey: "community.slide4Desc" },
-  { type: "photo", image: "/images/flooding.jpg",    titleKey: "community.slide5Title", descKey: "community.slide5Desc" },
+type Report = {
+  id: string;
+  reference_no: string;
+  infrastructure_type: string;
+  damage_level: string;
+  status: string;
+  submitted_at: string;
+};
+
+type Notice = {
+  id: string;
+  title: string;
+  message: string;
+  status: string | null;
+  is_read: boolean;
+  created_at: string;
+};
+
+type Loaded = { reports: Report[] | null; notices: Notice[] | null; failed: boolean };
+
+const tabs = [
+  { id: 'home',          label: 'Home',       icon: Home },
+  { id: 'my-reports',    label: 'My reports', icon: ClipboardList },
+  { id: 'report',        label: 'Report',     icon: PlusCircle },
+  { id: 'notifications', label: 'Alerts',     icon: Bell },
 ];
 
-// Realigned to use slide texts as a fallback since notif keys are missing in en.json
-const notifications = [
-  { id: 1, type: "update",  titleKey: "community.slide2Title", descKey: "community.slide2Desc", time: "2 hrs ago",  read: false },
-  { id: 2, type: "resolve", titleKey: "community.slide4Title", descKey: "community.slide4Desc", time: "1 day ago",  read: false },
-  { id: 3, type: "info",    titleKey: "community.slide5Title", descKey: "community.slide5Desc", time: "2 days ago", read: true  },
+const typeLabels: Record<string, string> = {
+  road: 'Road', building: 'Building', bridge: 'Bridge',
+  water: 'Water', power: 'Power', other: 'Other',
+};
+const typeIcons: Record<string, React.ElementType> = {
+  road: Route, building: Building2, bridge: Landmark,
+  water: Droplets, power: Zap, other: MapPin,
+};
+const damageLabels: Record<string, string> = {
+  minimal: 'Minimal', medium: 'Medium', destroyed: 'Destroyed',
+};
+
+// The reporter sees four stages, even though reports have more internal statuses
+const STAGES = ['Submitted', 'Under review', 'Responded', 'Resolved'];
+const stageColors = [
+  'bg-slate-100 text-slate-700',
+  'bg-yellow-100 text-yellow-800',
+  'bg-sky-100 text-sky-800',
+  'bg-green-100 text-green-800',
 ];
+function stageOf(status: string): number {
+  if (status === 'submitted') return 0;
+  if (status === 'responded') return 2;
+  if (status === 'resolved') return 3;
+  return 1; // under_review, assigned, accepted
+}
+
+function timeAgo(iso: string): string {
+  const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins} min ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs} hr${hrs === 1 ? '' : 's'} ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days} day${days === 1 ? '' : 's'} ago`;
+}
+
+// Tracks whether the device is online
+function subscribeOnline(callback: () => void) {
+  window.addEventListener('online', callback);
+  window.addEventListener('offline', callback);
+  return () => {
+    window.removeEventListener('online', callback);
+    window.removeEventListener('offline', callback);
+  };
+}
+
+// Security rules in the database make sure this only returns the signed-in user's own data
+async function fetchAll(): Promise<Loaded> {
+  const [r, n] = await Promise.all([
+    supabase
+      .from('reports')
+      .select('id, reference_no, infrastructure_type, damage_level, status, submitted_at')
+      .order('submitted_at', { ascending: false }),
+    supabase
+      .from('notifications')
+      .select('id, title, message, status, is_read, created_at')
+      .order('created_at', { ascending: false })
+      .limit(30),
+  ]);
+  return {
+    reports: r.data as Report[] | null,
+    notices: n.data as Notice[] | null,
+    failed: Boolean(r.error || n.error),
+  };
+}
+
+function Progress({ stage }: { stage: number }) {
+  return (
+    <div className="grid grid-cols-4 gap-1.5">
+      {STAGES.map((label, i) => (
+        <div key={label}>
+          <div
+            className={`h-1.5 rounded-full ${
+              i < stage
+                ? 'bg-blue-900'
+                : i === stage
+                ? stage === 3 ? 'bg-green-600' : 'bg-orange-500'
+                : 'bg-slate-200'
+            }`}
+          />
+          <p className={`mt-1 text-[10px] font-bold leading-tight ${i <= stage ? 'text-slate-800' : 'text-slate-400'}`}>
+            {label}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ReportCard({ report }: { report: Report }) {
+  const stage = stageOf(report.status);
+  const Icon = typeIcons[report.infrastructure_type] ?? MapPin;
+  return (
+    <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm space-y-3">
+      <div className="flex items-start gap-3">
+        <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-5 h-5 text-blue-900" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-blue-900 font-black text-sm font-mono truncate">{report.reference_no}</span>
+            <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-full whitespace-nowrap ${stageColors[stage]}`}>
+              {STAGES[stage]}
+            </span>
+          </div>
+          <p className="text-xs text-slate-500 font-semibold mt-0.5">
+            {typeLabels[report.infrastructure_type] ?? report.infrastructure_type}
+            {' • '}
+            {damageLabels[report.damage_level] ?? report.damage_level} damage
+            {' • '}
+            {timeAgo(report.submitted_at)}
+          </p>
+        </div>
+      </div>
+      <Progress stage={stage} />
+    </div>
+  );
+}
 
 export default function CommunityHome() {
-  const t = useTranslations();
-  const [current, setCurrent] = useState(0);
-  const [activeTab, setActiveTab] = useState("home");
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState('home');
+  const [ready, setReady] = useState(false);
+  const [fullName, setFullName] = useState('');
+  const [reports, setReports] = useState<Report[]>([]);
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [loadError, setLoadError] = useState('');
+  const online = useSyncExternalStore(subscribeOnline, () => navigator.onLine, () => true);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrent((p) => (p + 1) % slides.length);
-    }, 5000);
-    return () => clearInterval(timer);
+  const applyData = useCallback((res: Loaded) => {
+    setLoadError(res.failed ? 'Could not load your reports. Please try again.' : '');
+    if (res.reports) setReports(res.reports);
+    if (res.notices) setNotices(res.notices);
   }, []);
 
-  const slide = slides[current];
-  const unreadCount = notifications.filter(n => !n.read).length;
+  // Require a signed-in community member
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.replace('/com_login');
+        return;
+      }
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role, full_name')
+        .eq('id', session.user.id)
+        .single();
+      if (profile?.role !== 'reporter') {
+        await supabase.auth.signOut();
+        router.replace('/com_login');
+        return;
+      }
+      const res = await fetchAll();
+      if (!cancelled) {
+        applyData(res);
+        setFullName(profile.full_name ?? '');
+        setReady(true);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [router, applyData]);
+
+  // Refresh the data whenever the user switches tab
+  useEffect(() => {
+    if (!ready) return;
+    let cancelled = false;
+    fetchAll().then((res) => {
+      if (!cancelled) applyData(res);
+    });
+    return () => { cancelled = true; };
+  }, [activeTab, ready, applyData]);
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    router.replace('/com_login');
+  }
+
+  async function markAllRead() {
+    await supabase.from('notifications').update({ is_read: true }).eq('is_read', false);
+    applyData(await fetchAll());
+  }
+
+  if (!ready) return <main className="min-h-screen bg-blue-900" />;
+
+  const firstName = fullName.split(' ')[0];
+  const initials = fullName
+    ? fullName.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()
+    : 'CM';
+
+  const unreadCount = notices.filter((n) => !n.is_read).length;
+  const resolvedCount = reports.filter((r) => r.status === 'resolved').length;
+  const inProgressCount = reports.length - resolvedCount;
 
   return (
     <main className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900">
-      
-      {/* Top Bar */}
-      <header className="bg-blue-900 sticky top-0 z-50 shadow-lg">
-        <div className="bg-blue-950 py-1 text-center text-[10px] text-blue-200 font-black tracking-widest uppercase">
-          {t('community.strip')}
-        </div>
 
-        <div className="px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-white p-1 rounded-lg flex items-center justify-center shadow">
-              <img src="/UNDP.png" alt="UNDP Logo" className="h-8 w-auto object-contain" />
-            </div>
-            <div>
-              <h1 className="text-white font-black text-base uppercase tracking-tight leading-none">
-                {t('community.title')}
-              </h1>
-              <p className="text-blue-300 text-[10px] font-bold tracking-wider">
-                {t('community.subtitle')}
-              </p>
-            </div>
+      {/* Top bar */}
+      <header className="bg-blue-900 sticky top-0 z-40 shadow-lg">
+        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div>
+            <h1 className="text-white font-black text-lg uppercase tracking-tight leading-none">
+              Crisis <span className="text-orange-400">Link</span>
+            </h1>
+            <p className="text-blue-300 text-[10px] font-bold tracking-widest mt-1 uppercase">
+              Community portal
+            </p>
           </div>
-
-          <div className="flex items-center gap-3">
-            <button onClick={() => setActiveTab("notifications")} className="relative p-2">
-              <Bell className="w-6 h-6 text-white" />
-              {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center text-[9px] text-white font-black">
-                  {unreadCount}
-                </span>
-              )}
-            </button>
-            <div className="w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center text-white font-black text-xs">
-              CM
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 bg-orange-600 rounded-full flex items-center justify-center text-white font-black text-xs">
+              {initials}
             </div>
+            <button onClick={handleSignOut} aria-label="Sign out" className="p-2">
+              <LogOut className="w-5 h-5 text-blue-300 hover:text-white" />
+            </button>
           </div>
         </div>
-
-        {/* Navigation Tabs */}
-        <div className="flex border-t border-blue-800">
-          {[
-            { id: "home",          labelKey: "community.tabHome",      icon: <Home className="w-4 h-4" /> },
-            { id: "report",        labelKey: "community.tabReport",    icon: <PlusCircle className="w-4 h-4" /> },
-            { id: "my-reports",    labelKey: "community.tabMyReports", icon: <ClipboardList className="w-4 h-4" /> },
-            { id: "notifications", labelKey: "community.tabAlerts",    icon: <Bell className="w-4 h-4" /> },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => tab.id === "report" ? window.location.href = "/report" : setActiveTab(tab.id)}
-              className={`flex-1 flex flex-col items-center gap-1 py-2.5 text-[10px] font-black uppercase tracking-wide transition-colors relative ${
-                activeTab === tab.id
-                  ? "text-orange-400 border-b-2 border-orange-400"
-                  : "text-blue-300 hover:text-white"
-              }`}
-            >
-              {tab.icon}
-              {t(tab.labelKey)}
-              {tab.id === "notifications" && unreadCount > 0 && (
-                <span className="absolute top-1.5 right-3 w-3.5 h-3.5 bg-orange-500 rounded-full text-[8px] text-white font-black flex items-center justify-center">
-                  {unreadCount}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
+        {!online && (
+          <div className="bg-yellow-400 py-1.5 text-center text-slate-900 font-black text-[10px] uppercase tracking-tight">
+            <span className="inline-flex items-center gap-2">
+              <WifiOff className="w-3 h-3" />
+              You are offline. Showing the last loaded data.
+            </span>
+          </div>
+        )}
       </header>
 
-      {/* Main Content Body */}
-      <div className="flex-grow flex flex-col max-w-2xl mx-auto w-full">
+      {/* Content */}
+      <div className="flex-grow w-full max-w-2xl mx-auto pb-28">
 
-        {/* HOME TAB */}
-        {activeTab === "home" && (
-          <div className="p-4 space-y-4 flex flex-col flex-grow">
-            
-            {/* Welcome message */}
-            <div className="bg-blue-900 rounded-2xl p-4 flex items-center gap-3">
-              <div className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center text-white font-black text-sm flex-shrink-0">
-                CM
-              </div>
-              <div>
-                <p className="text-white font-black text-sm">{t('community.welcome')}</p>
-                <p className="text-blue-300 text-xs font-medium">{t('community.welcomeSub')}</p>
-              </div>
-            </div>
+        {loadError && (
+          <p role="alert" className="mx-4 mt-4 text-red-600 text-xs font-bold text-center">{loadError}</p>
+        )}
 
-            {/* Stats matrix */}
-            <div className="grid grid-cols-3 gap-3">
+        {/* HOME */}
+        {activeTab === 'home' && (
+          <div className="p-4 space-y-6">
+
+            {/* Welcome */}
+            <section className="bg-blue-900 rounded-3xl p-5 shadow-lg">
+              <h2 className="text-white text-2xl font-black">
+                {firstName ? `Good day, ${firstName}` : 'Good day'}
+              </h2>
+              <p className="text-blue-200 text-sm mt-1">
+                Report a crisis and follow it until it is resolved.
+              </p>
+              <Link
+                href="/report"
+                className="mt-5 w-full bg-orange-600 hover:bg-orange-700 text-white font-black uppercase py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98]"
+              >
+                <PlusCircle className="w-5 h-5" />
+                Create new report
+              </Link>
+            </section>
+
+            {/* Stats */}
+            <section className="grid grid-cols-3 gap-3">
               {[
-                { labelKey: "community.statMyReports",   value: "3", color: "text-blue-900" },
-                { labelKey: "community.statUnderReview", value: "1", color: "text-yellow-600" },
-                { labelKey: "community.statResolved",    value: "2", color: "text-green-600" },
+                { label: 'My reports',  value: reports.length,  color: 'text-blue-900' },
+                { label: 'In progress', value: inProgressCount, color: 'text-orange-600' },
+                { label: 'Resolved',    value: resolvedCount,   color: 'text-green-600' },
               ].map((stat) => (
-                <div key={stat.labelKey} className="bg-white rounded-2xl p-3 text-center border border-slate-100 shadow-sm">
-                  <p className={`text-2xl font-black ${stat.color}`}>{stat.value}</p>
-                  <p className="text-slate-500 text-[10px] font-bold uppercase mt-0.5">{t(stat.labelKey)}</p>
+                <div key={stat.label} className="bg-white rounded-2xl p-3 text-center border border-slate-100 shadow-sm">
+                  <p className={`text-3xl font-black ${stat.color}`}>{stat.value}</p>
+                  <p className="text-slate-500 text-[10px] font-bold uppercase mt-0.5">{stat.label}</p>
                 </div>
               ))}
-            </div>
+            </section>
 
-            {/* Actions button */}
-            <Link href="/report" className="w-full bg-orange-600 hover:bg-orange-700 text-white font-black uppercase py-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.98]">
-              <PlusCircle className="w-5 h-5" />
-              {t('community.newReport')}
-            </Link>
-
-            {/* Slideshow Display Container */}
-            <div className="grow relative rounded-2xl overflow-hidden border border-slate-100 shadow-lg" style={{ minHeight: "240px" }}>
-              {slide.type === "photo" ? (
-                <div className="relative w-full h-full min-h-[240px]">
-                  <img 
-                    src={slide.image} 
-                    alt={t(slide.titleKey)} 
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-blue-950/90 via-blue-950/40 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-5 text-left z-10">
-                    <h3 className="text-white font-black uppercase text-base tracking-tight">{t(slide.titleKey)}</h3>
-                    <p className="text-slate-200 text-xs mt-1 leading-relaxed">{t(slide.descKey)}</p>
-                  </div>
-                </div>
+            {/* Latest report */}
+            <section className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-blue-900 font-black uppercase text-sm tracking-widest">Latest report</h3>
+                {reports.length > 1 && (
+                  <button onClick={() => setActiveTab('my-reports')} className="text-blue-700 text-xs font-black uppercase hover:underline">
+                    View all
+                  </button>
+                )}
+              </div>
+              {reports[0] ? (
+                <ReportCard report={reports[0]} />
               ) : (
-                <div className="bg-blue-900 p-8 flex flex-col items-center justify-center text-center h-full min-h-[240px]">
-                  <WifiOff className="w-10 h-10 text-white mb-4 animate-pulse" />
-                  <h3 className="text-white font-black uppercase text-lg mb-2">{t(slide.titleKey)}</h3>
-                  <p className="text-slate-300 text-sm leading-relaxed max-w-xs">{t(slide.descKey)}</p>
+                <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm text-center">
+                  <p className="text-slate-600 text-sm font-medium">
+                    You have not submitted any reports yet. When you do, you can follow its progress here.
+                  </p>
                 </div>
               )}
+            </section>
 
-              {/* Slider Directional Controls */}
-              <div className="absolute inset-0 flex items-center justify-between px-2 pointer-events-none z-20">
-                <button 
-                  onClick={() => setCurrent((p) => (p === 0 ? slides.length - 1 : p - 1))}
-                  className="pointer-events-auto w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center border border-white/20 hover:bg-black/60 transition-all"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <button 
-                  onClick={() => setCurrent((p) => (p + 1) % slides.length)}
-                  className="pointer-events-auto w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center border border-white/20 hover:bg-black/60 transition-all"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Slider Navigation Indicators */}
-              <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-20">
-                {slides.map((_, i) => (
-                  <button 
-                    key={i} 
-                    onClick={() => setCurrent(i)}
-                    className={`h-1.5 rounded-full transition-all ${i === current ? "w-6 bg-orange-500" : "w-1.5 bg-white/40"}`}
-                  />
+            {/* How it works */}
+            <section className="space-y-3">
+              <h3 className="text-blue-900 font-black uppercase text-sm tracking-widest">How reporting works</h3>
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm divide-y divide-slate-100">
+                {[
+                  { icon: Camera, title: 'Report', text: 'Take photos, share the location and choose the damage level.' },
+                  { icon: Search, title: 'Review', text: 'The Operations Center checks your report and sends it to the right responder.' },
+                  { icon: Truck, title: 'Respond', text: 'The responder takes action, and you get an alert at every step.' },
+                ].map((step, i) => (
+                  <div key={step.title} className="p-4 flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                      <step.icon className="w-5 h-5 text-orange-600" />
+                    </div>
+                    <div>
+                      <p className="text-slate-900 font-black text-sm">
+                        {i + 1}. {step.title}
+                      </p>
+                      <p className="text-slate-500 text-xs font-medium mt-0.5 leading-relaxed">{step.text}</p>
+                    </div>
+                  </div>
                 ))}
               </div>
-            </div>
+            </section>
           </div>
         )}
 
-        {/* MY REPORTS TAB */}
-        {activeTab === "my-reports" && (
+        {/* MY REPORTS */}
+        {activeTab === 'my-reports' && (
           <div className="p-4 space-y-4">
             <h2 className="text-blue-900 font-black uppercase text-sm tracking-widest">
-              {t('community.myReportsTitle')}
+              My reports ({reports.length})
             </h2>
-            {[
-              { ref: "CRT-2026-00142", type: "Road",     grade: "Destroyed", status: "Under Review", statusColor: "bg-yellow-100 text-yellow-800", time: "2 hrs ago"  },
-              { ref: "CRT-2026-00098", type: "Building", grade: "Minimal",   status: "Resolved",     statusColor: "bg-green-100 text-green-800",   time: "3 days ago" },
-              { ref: "CRT-2026-00071", type: "Water",    grade: "Medium",    status: "Responded",    statusColor: "bg-sky-100 text-sky-800",        time: "5 days ago" },
-            ].map((report) => (
-              <div key={report.ref} className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-blue-900 font-black text-sm font-mono">{report.ref}</span>
-                  <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-full ${report.statusColor}`}>
-                    {report.status}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 text-xs text-slate-500 font-semibold">
-                  <span>{report.type}</span>
-                  <span>•</span>
-                  <span>{report.grade}</span>
-                  <span>•</span>
-                  <span>{report.time}</span>
-                </div>
-                <button className="text-blue-700 text-xs font-black uppercase hover:underline">
-                  {t('community.trackReport')}
-                </button>
+
+            {reports.length === 0 && (
+              <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm text-center space-y-3">
+                <p className="text-slate-600 text-sm font-medium">You have not submitted any reports yet.</p>
+                <Link href="/report" className="inline-block bg-orange-600 hover:bg-orange-700 text-white font-black uppercase text-xs px-5 py-3 rounded-xl">
+                  Create new report
+                </Link>
               </div>
+            )}
+
+            {reports.map((report) => (
+              <ReportCard key={report.id} report={report} />
             ))}
           </div>
         )}
 
-        {/* NOTIFICATIONS TAB */}
-        {activeTab === "notifications" && (
+        {/* ALERTS */}
+        {activeTab === 'notifications' && (
           <div className="p-4 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-blue-900 font-black uppercase text-sm tracking-widest">
-                {t('community.tabAlerts')}
-              </h2>
+              <h2 className="text-blue-900 font-black uppercase text-sm tracking-widest">Alerts</h2>
+              {unreadCount > 0 && (
+                <button onClick={markAllRead} className="text-blue-700 text-xs font-black uppercase hover:underline">
+                  Mark all as read
+                </button>
+              )}
             </div>
 
-            {notifications.map((n) => (
-              <div key={n.id} className={`bg-white rounded-2xl p-4 border shadow-sm flex gap-3 ${n.read ? "border-slate-100" : "border-blue-200"}`}>
+            {notices.length === 0 && (
+              <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm text-center">
+                <p className="text-slate-600 text-sm font-medium">
+                  No alerts yet. Updates about your reports will appear here.
+                </p>
+              </div>
+            )}
+
+            {notices.map((n) => (
+              <div key={n.id} className={`bg-white rounded-2xl p-4 border shadow-sm flex gap-3 ${n.is_read ? 'border-slate-100' : 'border-blue-200'}`}>
                 <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  n.type === "resolve" ? "bg-green-100" : "bg-orange-100"
+                  n.status === 'resolved' ? 'bg-green-100' : 'bg-orange-100'
                 }`}>
-                  {n.type === "resolve" ? <CheckCircle className="w-4 h-4 text-green-600" /> : <RefreshCw className="w-4 h-4 text-orange-600" />}
+                  {n.status === 'resolved'
+                    ? <CheckCircle className="w-4 h-4 text-green-600" />
+                    : <RefreshCw className="w-4 h-4 text-orange-600" />}
                 </div>
                 <div className="flex-1">
                   <div className="flex items-start justify-between gap-2">
-                    <p className={`text-sm font-black uppercase tracking-tight ${n.read ? "text-slate-700" : "text-slate-900"}`}>
-                      {t(n.titleKey)}
+                    <p className={`text-sm font-black tracking-tight ${n.is_read ? 'text-slate-700' : 'text-slate-900'}`}>
+                      {n.title}
                     </p>
-                    {!n.read && <span className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0 mt-1.5" />}
+                    {!n.is_read && <span className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0 mt-1.5" />}
                   </div>
-                  <p className="text-slate-500 text-xs font-medium mt-0.5 leading-relaxed">{t(n.descKey)}</p>
-                  <p className="text-slate-400 text-[10px] font-bold mt-1.5 uppercase">{n.time}</p>
+                  <p className="text-slate-500 text-xs font-medium mt-0.5 leading-relaxed">{n.message}</p>
+                  <p className="text-slate-400 text-[10px] font-bold mt-1.5 uppercase">{timeAgo(n.created_at)}</p>
                 </div>
               </div>
             ))}
@@ -263,13 +420,42 @@ export default function CommunityHome() {
         )}
       </div>
 
-      {/* Persistent Offline Status Footer */}
-      <footer className="bg-yellow-400 py-2 text-center text-slate-900 font-black text-[10px] uppercase tracking-tighter">
-        <div className="flex items-center justify-center gap-2">
-          <WifiOff className="w-3 h-3" />
-          {t('community.offline')}
+      {/* Bottom navigation */}
+      <nav className="fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
+        <div className="max-w-2xl mx-auto grid grid-cols-4">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isReport = tab.id === 'report';
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => (isReport ? router.push('/report') : setActiveTab(tab.id))}
+                className="relative flex flex-col items-center gap-1 py-2.5 transition-colors"
+              >
+                {isActive && <span className="absolute top-0 h-0.5 w-8 bg-orange-500 rounded-full" />}
+                {isReport ? (
+                  <span className="w-9 h-9 -mt-0.5 rounded-full bg-orange-600 flex items-center justify-center shadow">
+                    <Icon className="w-5 h-5 text-white" />
+                  </span>
+                ) : (
+                  <Icon className={`w-6 h-6 ${isActive ? 'text-blue-900' : 'text-slate-400'}`} />
+                )}
+                <span className={`text-[10px] font-black uppercase tracking-wide ${
+                  isReport ? 'text-orange-600' : isActive ? 'text-blue-900' : 'text-slate-400'
+                }`}>
+                  {tab.label}
+                </span>
+                {tab.id === 'notifications' && unreadCount > 0 && (
+                  <span className="absolute top-1.5 right-6 w-4 h-4 bg-orange-500 rounded-full text-[9px] text-white font-black flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
-      </footer>
+      </nav>
     </main>
   );
 }

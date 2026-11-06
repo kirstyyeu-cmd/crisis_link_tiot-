@@ -1,185 +1,184 @@
 "use client";
-import React, { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-import { Eye, EyeOff, CheckCircle, UserPlus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { UserPlus } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
+import PasswordInput from '@/components/Passwordinput';
+
+function passwordStrength(pw: string) {
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
+  if (/\d/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  const labels = ['Too weak', 'Weak', 'Fair', 'Good', 'Strong'];
+  const colors = ['bg-slate-200', 'bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-600'];
+  return { score, label: labels[score], color: colors[score] };
+}
+
+const inputClass =
+  'w-full p-3 bg-slate-50 border-2 border-slate-200 rounded-xl outline-none text-slate-900 placeholder:text-slate-300 font-semibold focus:border-blue-900 transition-all';
+const labelClass = 'text-blue-900 text-xs font-black uppercase tracking-wide';
 
 export default function CreateAccountPage() {
-  const t = useTranslations();
-  const [form, setForm] = useState({ fullName: "", email: "", phone: "", password: "", confirm: "", role: "community" });
-  const [showPass, setShowPass]       = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [submitted, setSubmitted]     = useState(false);
-  const [error, setError]             = useState("");
+  const router = useRouter();
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [address, setAddress] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [error, setError] = useState('');
+  const [done, setDone] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  function update(field: string, value: string) {
-    setForm(p => ({ ...p, [field]: value }));
-    setError("");
-  }
+  const strength = passwordStrength(password);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!form.fullName || !form.email || !form.password || !form.confirm) {
-      setError(t('createAccount.errorOccurred')); return;
-    }
-    if (form.password !== form.confirm) {
-      setError("Passwords do not match."); return;
-    }
-    if (form.password.length < 8) {
-      setError("Password must be at least 8 characters."); return;
-    }
-    // TODO: replace with real API call
-    setSubmitted(true);
-  }
+    setError('');
 
-  if (submitted) {
-    return (
-      <main className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200 text-center">
-          <div className="bg-blue-900 pt-10 pb-8 px-6">
-            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="w-8 h-8 text-white" />
-            </div>
-            <h2 className="text-white font-black text-xl uppercase tracking-tight">
-              {t('createAccount.title')}
-            </h2>
-            <p className="text-blue-200 text-sm mt-2">{t('createAccount.welcomePlatform')}</p>
-          </div>
-          <div className="p-8 space-y-4">
-            <p className="text-slate-600 text-sm font-medium leading-relaxed">
-              {t('createAccount.successMessage')}
-            </p>
-            <Link href="/com_login" className="block w-full py-4 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase text-sm rounded-xl transition-all active:scale-[0.98]">
-              {t('createAccount.signIn')}
-            </Link>
-          </div>
-        </div>
-      </main>
-    );
+    if (!/^\+?[0-9\s-]{7,15}$/.test(phone.trim())) {
+      setError('Please enter a valid phone number.');
+      return;
+    }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.');
+      return;
+    }
+    if (password !== confirm) {
+      setError('Passwords do not match.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: { full_name: fullName.trim(), phone: phone.trim(), address: address.trim() },
+          emailRedirectTo: `${window.location.origin}/com_login`,
+        },
+      });
+
+      if (signUpError) {
+        setError(
+          signUpError.message.toLowerCase().includes('already')
+            ? 'This email is already registered.'
+            : 'An error occurred. Please try again.'
+        );
+        return;
+      }
+      // Supabase returns an empty identities list when the email already exists
+      if (data.user && data.user.identities?.length === 0) {
+        setError('This email is already registered.');
+        return;
+      }
+      if (data.session) {
+        router.push('/community'); // email confirmation is off
+        return;
+      }
+      setDone(true); // email confirmation is on
+    } catch {
+      setError('An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
+    <main className="min-h-screen flex items-center justify-center bg-blue-900 p-4 font-sans">
+      <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden">
 
-        {/* Header */}
-        <div className="bg-blue-900 pt-10 pb-8 flex flex-col items-center text-center px-6">
-          <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-3">
+        <div className="bg-blue-900 p-8 flex flex-col items-center text-white text-center border-b-4 border-orange-600">
+          <div className="mb-4 w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
             <UserPlus className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-white text-xl font-black uppercase tracking-tight">
-            {t('createAccount.title')}
-          </h1>
-          <p className="text-blue-200 text-xs font-bold uppercase tracking-widest mt-1">
-            Crisis Impact Reporter
+          <h1 className="text-lg font-black uppercase tracking-wider">Create account</h1>
+          <p className="text-blue-300 text-xs font-bold uppercase tracking-widest mt-1">
+            Sign up to report and track crises
           </p>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="px-8 pt-7 pb-10 border-t-8 border-orange-600 space-y-4">
-
-          {/* Role selector */}
-          <div>
-            <label className="block text-blue-900 font-black uppercase text-[11px] mb-2 ml-1">
-              {t('createAccount.welcomeTitle')}
-            </label>
-            <div className="flex gap-2">
-              {["community", "responder"].map(r => (
-                <button key={r} type="button" onClick={() => update("role", r)}
-                  className={`flex-1 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wide transition-all ${
-                    form.role === r
-                      ? "bg-blue-900 text-white border-2 border-blue-900"
-                      : "bg-white text-slate-600 border-2 border-slate-200 hover:border-blue-300"
-                  }`}>
-                  {r === "community" ? t('createAccount.welcomeTitle') : "Field Responder"}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Full name */}
-          <div>
-            <label className="block text-blue-900 font-black uppercase text-[11px] mb-2 ml-1">
-              {t('createAccount.fullNameLabel')} <span className="text-orange-600">*</span>
-            </label>
-            <input type="text" value={form.fullName} onChange={e => update("fullName", e.target.value)}
-              placeholder={t('createAccount.fullNamePlaceholder')}
-              className="w-full p-3 bg-white border-2 border-slate-200 rounded-xl focus:border-blue-900 text-slate-900 placeholder:text-slate-300 outline-none font-semibold transition-all"
-            />
-          </div>
-
-          {/* Email */}
-          <div>
-            <label className="block text-blue-900 font-black uppercase text-[11px] mb-2 ml-1">
-              {t('createAccount.emailLabel')} <span className="text-orange-600">*</span>
-            </label>
-            <input type="email" value={form.email} onChange={e => update("email", e.target.value)}
-              placeholder={t('createAccount.emailPlaceholder')}
-              className="w-full p-3 bg-white border-2 border-slate-200 rounded-xl focus:border-blue-900 text-slate-900 placeholder:text-slate-300 outline-none font-semibold transition-all"
-            />
-          </div>
-
-          {/* Phone */}
-          <div>
-            <label className="block text-blue-900 font-black uppercase text-[11px] mb-2 ml-1">
-              Phone Number <span className="text-slate-400 font-normal normal-case">(optional)</span>
-            </label>
-            <input type="tel" value={form.phone} onChange={e => update("phone", e.target.value)}
-              placeholder="+263 7X XXX XXXX"
-              className="w-full p-3 bg-white border-2 border-slate-200 rounded-xl focus:border-blue-900 text-slate-900 placeholder:text-slate-300 outline-none font-semibold transition-all"
-            />
-          </div>
-
-          {/* Password */}
-          <div>
-            <label className="block text-blue-900 font-black uppercase text-[11px] mb-2 ml-1">
-              {t('createAccount.passwordLabel')} <span className="text-orange-600">*</span>
-            </label>
-            <div className="relative">
-              <input type={showPass ? "text" : "password"} value={form.password}
-                onChange={e => update("password", e.target.value)}
-                placeholder={t('createAccount.passwordPlaceholder')}
-                className="w-full p-3 pr-12 bg-white border-2 border-slate-200 rounded-xl focus:border-blue-900 text-slate-900 placeholder:text-slate-300 outline-none font-semibold transition-all"
-              />
-              <button type="button" onClick={() => setShowPass(!showPass)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
-                {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-
-          {/* Confirm password */}
-          <div>
-            <label className="block text-blue-900 font-black uppercase text-[11px] mb-2 ml-1">
-              {t('createAccount.confirmPasswordLabel')} <span className="text-orange-600">*</span>
-            </label>
-            <div className="relative">
-              <input type={showConfirm ? "text" : "password"} value={form.confirm}
-                onChange={e => update("confirm", e.target.value)}
-                placeholder={t('createAccount.confirmPasswordPlaceholder')}
-                className="w-full p-3 pr-12 bg-white border-2 border-slate-200 rounded-xl focus:border-blue-900 text-slate-900 placeholder:text-slate-300 outline-none font-semibold transition-all"
-              />
-              <button type="button" onClick={() => setShowConfirm(!showConfirm)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
-                {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-
-          {error && <p className="text-red-600 text-xs font-bold text-center">{error}</p>}
-
-          <button type="submit" className="w-full py-4 mt-2 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase text-sm rounded-xl shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2">
-            <CheckCircle className="w-4 h-4" />
-            {t('createAccount.submitBtn')}
-          </button>
-
-          <div className="text-center pt-2">
-            <span className="text-slate-400 text-xs font-medium">{t('createAccount.alreadyHave')} </span>
-            <Link href="/com_login" className="text-blue-700 font-black text-xs hover:underline uppercase">
-              {t('createAccount.signIn')}
+        {done ? (
+          <div className="p-8 space-y-4 text-center">
+            <p className="text-blue-900 font-black text-lg">Account created!</p>
+            <p className="text-slate-600 text-sm">
+              We sent a confirmation link to <span className="font-bold">{email}</span>. Open it,
+              then sign in.
+            </p>
+            <Link
+              href="/com_login"
+              className="block w-full bg-orange-600 hover:bg-orange-700 text-white font-black py-4 rounded-xl uppercase tracking-wide text-sm"
+            >
+              Go to sign in
             </Link>
           </div>
-        </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="p-8 space-y-4">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="fullName" className={labelClass}>Full name</label>
+              <input id="fullName" required autoComplete="name" value={fullName}
+                onChange={(e) => setFullName(e.target.value)} placeholder="FirstName LastName" className={inputClass} />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label htmlFor="phone" className={labelClass}>Phone number</label>
+              <input id="phone" type="tel" required autoComplete="tel" value={phone}
+                onChange={(e) => setPhone(e.target.value)} placeholder="+263 77 123 4567" className={inputClass} />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label htmlFor="email" className={labelClass}>Email address</label>
+              <input id="email" type="email" required autoComplete="email" value={email}
+                onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className={inputClass} />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label htmlFor="address" className={labelClass}>Address</label>
+              <input id="address" required autoComplete="street-address" value={address}
+                onChange={(e) => setAddress(e.target.value)} placeholder="Street, suburb, town" className={inputClass} />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label htmlFor="password" className={labelClass}>Password</label>
+              <PasswordInput id="password" required autoComplete="new-password" value={password}
+                onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className={inputClass} />
+              {password && (
+                <div>
+                  <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div className={`h-full ${strength.color} transition-all`} style={{ width: `${(strength.score / 4) * 100}%` }} />
+                  </div>
+                  <p className="text-slate-500 text-[11px] font-semibold mt-1">
+                    Password strength: {strength.label}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label htmlFor="confirm" className={labelClass}>Confirm password</label>
+              <PasswordInput id="confirm" required autoComplete="new-password" value={confirm}
+                onChange={(e) => setConfirm(e.target.value)} placeholder="••••••••" className={inputClass} />
+            </div>
+
+            {error && (
+              <p role="alert" className="text-red-600 text-xs font-bold text-center">{error}</p>
+            )}
+
+            <button type="submit" disabled={loading}
+              className="w-full bg-orange-600 hover:bg-orange-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-wide transition-all active:scale-[0.98] text-sm mt-2">
+              {loading ? 'Creating account...' : 'Register account'}
+            </button>
+
+            <p className="text-center text-xs text-slate-500 font-semibold">
+              Already have an account?{' '}
+              <Link href="/com_login" className="text-blue-700 hover:underline font-bold">Sign in</Link>
+            </p>
+          </form>
+        )}
       </div>
     </main>
   );
